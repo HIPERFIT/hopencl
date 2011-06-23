@@ -1,0 +1,49 @@
+Name:                hopencl
+
+-- The package version. See the Haskell package versioning policy
+-- (http://www.haskell.org/haskellwiki/Package_versioning_policy) for
+-- standards guiding when and how versions should be incremented.
+Version:             0.1
+Synopsis:            Haskell bindings for OpenCL (spec v 1.1)
+-- Description:         n/a
+Homepage:            https://github.com/HIPERFIT/hopencl
+License:             BSD3
+License-file:        LICENSE
+Author:              Martin Dybdal
+Maintainer:          dybber@dybber.dk
+Copyright:           Copyright (c) 2011. Martin Dybdal <dybber@dybber.dk>
+
+Category:            Foreign
+Build-type:          Simple
+Extra-source-files:  README
+Cabal-version:       >=1.2
+
+Library
+  Other-modules:     Foreign.OpenCL.Bindings.Util
+
+  Exposed-modules:   Foreign.OpenCL.Bindings.Types
+                   , Foreign.OpenCL.Bindings.Error
+                   , Foreign.OpenCL.Bindings.Import
+                   , Foreign.OpenCL.Bindings.Platform
+                   , Foreign.OpenCL.Bindings.Device
+                   , Foreign.OpenCL.Bindings.Context
+
+
+  Build-depends:     base >= 4 && < 5
+  Build-tools:       c2hs
+  Extra-Libraries:   OpenCL
+  Include-dirs: include
+
+  if flag(amd)
+    Extra-lib-dirs: /usr/lib/OpenCL/
+    Include-dirs: /home/dybber/lib/ati-stream-sdk-v2.3-lnx64/include/
+  if flag(cuda)
+    Include-dirs: /usr/local/cuda/include/
+
+Flag amd
+  Description:          Use the AMD location of include and object files
+  Default:              True
+
+Flag cuda
+  Description:          Use the location of headers used by CUDA based OpenCL
+  Default:              False
