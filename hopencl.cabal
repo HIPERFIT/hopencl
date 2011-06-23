@@ -27,6 +27,7 @@ Library
                    , Foreign.OpenCL.Bindings.Platform
                    , Foreign.OpenCL.Bindings.Device
                    , Foreign.OpenCL.Bindings.Context
+                   , Foreign.OpenCL.Bindings
 
   Other-modules:
 

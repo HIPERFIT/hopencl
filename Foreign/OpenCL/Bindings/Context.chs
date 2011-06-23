@@ -30,10 +30,10 @@ createContext devs = let ndev = length devs in
 
 -- TODO
 contextDevices :: Context -> IO [Device]
-contextDevices context = undefined
+contextDevices context = error "Retrieving devices attached to a context is still not supported."
 
 contextProperties :: Context -> IO [ContextProperties]
-contextProperties context = undefined
+contextProperties context = error "Retrieving the context properties is still not supported."
 
 -- C interfacing functions
 clCreateContext_ = {#call unsafe clCreateContext #}
