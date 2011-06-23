@@ -76,3 +76,4 @@ genericGetInfo info getInfoFun handler =
 
 enumToBitfield :: (Bits a, Integral a, Enum b) => [b] -> a
 enumToBitfield = foldr ((.|.) . fromIntegral . fromEnum) 0
+

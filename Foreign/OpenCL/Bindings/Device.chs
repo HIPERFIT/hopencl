@@ -39,7 +39,7 @@ import Foreign.ForeignPtr
 
 {# import Foreign.OpenCL.Bindings.Types #}
 {# import Foreign.OpenCL.Bindings.Error #}
-{# import Foreign.OpenCL.Bindings.Import #}
+{# import Foreign.OpenCL.Bindings.Finalizers #}
 import Foreign.OpenCL.Bindings.Util
 
 -- ^Obtain a list of available platforms.
@@ -51,6 +51,19 @@ getDevices platform typ =
 getDeviceInfo device info =
   withForeignPtr device $ \ptr ->
     getInfo (clGetDeviceInfo_ ptr) info
+
+-- Interfacing functions that performs error checking
+clGetDeviceIDs_ platform device_type num_entries devices num_devices =
+  do errcode <- {#call unsafe clGetDeviceIDs #} platform typ_code num_entries devices num_devices
+     checkErrorA "clGetDeviceIDs" errcode
+     return errcode
+    where typ_code = fromIntegral (fromEnum device_type)
+
+clGetDeviceInfo_ device name size value size_ret =
+  do errcode <- {#call unsafe clGetDeviceInfo #} device name size value size_ret
+     checkErrorA "clGetDeviceInfo" errcode
+     return errcode
+
 
 ------- Below are the device info query functions --------
 -- |The compute device address space size in bits.

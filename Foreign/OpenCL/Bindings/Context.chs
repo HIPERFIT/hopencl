@@ -11,7 +11,7 @@ import Foreign.Ptr
 
 {#import Foreign.OpenCL.Bindings.Types #}
 {#import Foreign.OpenCL.Bindings.Error #}
-{#import Foreign.OpenCL.Bindings.Import #}
+{#import Foreign.OpenCL.Bindings.Finalizers #}
 
 -- |Create a new context
 --
