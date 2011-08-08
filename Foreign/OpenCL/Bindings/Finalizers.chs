@@ -2,12 +2,12 @@
 #include <CL/cl.h>
 
 module Foreign.OpenCL.Bindings.Finalizers (
-  attachPlatformFinalizer,
-  attachDeviceFinalizer,
+  attachContextFinalizer,
+  attachCommandQueueFinalizer,
+  attachProgramFinalizer,
   withForeignPtrs
 )
 where
-
 
 import Foreign.C.Types
 import Foreign.Ptr
@@ -15,32 +15,35 @@ import Foreign.ForeignPtr
 
 {# import Foreign.OpenCL.Bindings.Types #}
 
------ Platform -----
+-- Context --
+attachContextFinalizer :: ClContext -> IO Context
+attachContextFinalizer = newForeignPtr clReleaseContextFunPtr
 
-attachPlatformFinalizer :: ClPlatformID -> IO Platform
-attachPlatformFinalizer = newForeignPtr clReleasePlatformFunPtr
+-- Pointer to context release function
+foreign import ccall "CL/cl.h &clReleaseContext" clReleaseContextFunPtr
+   :: FunPtr (ClContext -> IO ())
 
--- Pointer to platform release function
-foreign import ccall "CL/cl.h &clReleasePlatform" clReleasePlatformFunPtr
-   :: FunPtr (ClPlatformID -> IO ())
+-- CommandQueue --
+attachCommandQueueFinalizer :: ClCommandQueue -> IO CommandQueue
+attachCommandQueueFinalizer = newForeignPtr clReleaseCommandQueueFunPtr
 
------ Device -----
+-- Pointer to context release function
+foreign import ccall "CL/cl.h &clReleaseCommandQueue" clReleaseCommandQueueFunPtr
+   :: FunPtr (ClCommandQueue -> IO ())
 
-attachDeviceFinalizer :: ClDeviceID -> IO Device
-attachDeviceFinalizer = newForeignPtr clReleaseDeviceFunPtr
+-- Program Objects --
+attachProgramFinalizer :: ClProgram -> IO Program
+attachProgramFinalizer = newForeignPtr clReleaseProgramFunPtr
 
--- Pointer to platform release function
-foreign import ccall "CL/cl.h &clReleaseDevice" clReleaseDeviceFunPtr
-   :: FunPtr (ClDeviceID -> IO ())
-
-
+-- Pointer to context release function
+foreign import ccall "CL/cl.h &clReleaseProgram" clReleaseProgramFunPtr
+   :: FunPtr (ClProgram -> IO ())
 
 -- | Look at a list of foreign pointers, ensuring the pointers are not
 -- freed for at least the duration of the computation.
 withForeignPtrs :: [ForeignPtr a] -> ([Ptr a] -> IO b) -> IO b
 withForeignPtrs ptrs f = with' ptrs []
   where
---    with' :: [ForeignPtr a] -> [Ptr a] -> IO b
     with' [] ys = f (reverse ys)
     with' (p:ps) ys = withForeignPtr p $ \p' -> with' ps (p':ys)
 

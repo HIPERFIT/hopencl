@@ -5,17 +5,18 @@
 
 module Foreign.OpenCL.Bindings.Types (
   CPlatformID, CDeviceID, CContext, CCommandQueue, CProgram, CKernel, CEvent, CSampler,
-  ClPlatformID, ClDeviceID, ClContext, ClCommandQueue, ClProgram, ClKernel, ClEvent, ClSampler,
-  Platform, Device, Context, CommandQueue, Program, Kernel, Event, Sampler,
+  ClContext, ClCommandQueue, ClProgram, ClKernel, ClEvent, ClSampler,
+
+  PlatformID, DeviceID, Context, CommandQueue, Program, Kernel, Event, Sampler,
 
   ClChar, ClUChar, ClShort, ClUShort, ClInt, ClUInt, ClLong, ClULong, ClHalf,
   ClFloat, ClDouble,
 
   ClBitfield, ClBool, ClSize,
-  
+
   clFalse, clTrue,
 
-  PlatformInfo(..), ContextProperties(..), ContextInfo(..), DeviceType(..), DeviceInfo(..), DeviceFPConfig(..), DeviceMemCacheType(..), DeviceLocalMemType(..), DeviceExecCapabilities(..)
+  PlatformInfo(..), ContextProperties(..), ContextInfo(..), DeviceType(..), DeviceInfo(..), DeviceFPConfig(..), DeviceMemCacheType(..), DeviceLocalMemType(..), DeviceExecCapabilities(..), CommandQueueProperties(..), CommandQueueInfo(..), ProgramInfo(..), ProgramBuildInfo(..)
 )
 where
 
@@ -34,8 +35,8 @@ data CKernel
 data CEvent
 data CSampler
 
-{#pointer cl_platform_id as ClPlatformID -> CPlatformID #}
-{#pointer cl_device_id as ClDeviceID -> CDeviceID #}
+{#pointer cl_platform_id as PlatformID -> CPlatformID #}
+{#pointer cl_device_id as DeviceID -> CDeviceID #}
 {#pointer cl_context as ClContext -> CContext #}
 {#pointer cl_command_queue as ClCommandQueue -> CCommandQueue #}
 {#pointer cl_mem as ClMem -> CMem #}
@@ -44,8 +45,6 @@ data CSampler
 {#pointer cl_event as ClEvent -> CEvent #}
 {#pointer cl_sampler as ClSampler -> CSampler #}
 
-{#pointer cl_platform_id as Platform foreign -> CPlatformID #}
-{#pointer cl_device_id as Device foreign -> CDeviceID #}
 {#pointer cl_context as Context foreign -> CContext #}
 {#pointer cl_command_queue as CommandQueue foreign -> CCommandQueue #}
 {#pointer cl_program as Program foreign -> CProgram #}
@@ -107,12 +106,12 @@ clTrue = fromEnum ClTrue
 {#enum DeviceExecCapabilities {} deriving (Show, Eq) #}
 
 -- Command Queue
-{#enum ClCommandQueueInfo {} deriving (Show, Eq) #}
-{#enum ClCommandQueueProperties {} deriving (Show, Eq) #}
+{#enum CommandQueueInfo {} deriving (Show, Eq) #}
+{#enum CommandQueueProperties {} deriving (Show, Eq) #}
 
 -- Program objects
-{#enum ClProgramInfo {} deriving (Show, Eq) #}
-{#enum ClProgramBuildInfo {} deriving (Show, Eq) #}
+{#enum ProgramInfo {} deriving (Show, Eq) #}
+{#enum ProgramBuildInfo {} deriving (Show, Eq) #}
 {#enum ClBuildStatus {} deriving (Show, Eq) #}
 
 -- Kernels

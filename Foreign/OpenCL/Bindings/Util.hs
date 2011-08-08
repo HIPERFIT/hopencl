@@ -12,7 +12,7 @@ import Foreign.OpenCL.Bindings.Error
 -- A class for retrieving information about different OpenCL objects.
 -- Exports getInfo which is polymorhic in its output
 class ClGetInfo a where
-  getInfo :: Enum i => (CUInt -> ClSize -> Ptr () -> Ptr ClSize -> IO ClInt) -> i -> IO a
+  getInfo :: (Enum i, Integral b) => (b -> ClSize -> Ptr () -> Ptr ClSize -> IO ClInt) -> i -> IO a
 
 instance ClGetInfo [Char] where
    getInfo getInfoFun i = genericGetInfo i getInfoFun returnString
@@ -56,9 +56,9 @@ instance Storable a => ClGetList a where
 -- All OpenCL information-query function follows the same style:
 --   * First they are queried to determine size of the output
 --   * Then the actual output can be queried
-genericGetInfo :: Enum i
+genericGetInfo :: (Enum i, Integral b)
                => i
-               -> (CUInt -> ClSize -> Ptr () -> Ptr ClSize -> IO ClInt)
+               -> (b -> ClSize -> Ptr () -> Ptr ClSize -> IO ClInt)
                -> (ClSize -> Ptr () -> IO a)
                -> IO a
 genericGetInfo info getInfoFun handler =

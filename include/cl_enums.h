@@ -180,9 +180,9 @@ enum DeviceExecCapabilities {
 };
 
 /* cl_command_queue_properties */
-enum ClCommandQueueProperties {
-  ClQueueOutOfOrderExecModeEnable = CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE,
-  ClQueueProfilingEnable = CL_QUEUE_PROFILING_ENABLE
+enum CommandQueueProperties {
+  QueueOutOfOrderExecModeEnable = CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE,
+  QueueProfilingEnable = CL_QUEUE_PROFILING_ENABLE
 };
 
 /* cl_context_info */
@@ -199,11 +199,11 @@ enum ContextProperties {
 };
 
 /* cl_command_queue_info */
-enum ClCommandQueueInfo {
-  ClQueueContext = CL_QUEUE_CONTEXT,
-  ClQueueDevice = CL_QUEUE_DEVICE,
-  ClQueueReferenceCount = CL_QUEUE_REFERENCE_COUNT,
-  ClQueueProperties = CL_QUEUE_PROPERTIES
+enum CommandQueueInfo {
+  QueueContext = CL_QUEUE_CONTEXT,
+  QueueDevice = CL_QUEUE_DEVICE,
+  QueueReferenceCount = CL_QUEUE_REFERENCE_COUNT,
+  QueueProperties = CL_QUEUE_PROPERTIES
 };
 
 /* cl_mem_flags */
@@ -314,21 +314,21 @@ enum ClMapFlags {
 };
 
 /* cl_program_info */
-enum ClProgramInfo {
-  ClProgramReferenceCount = CL_PROGRAM_REFERENCE_COUNT,
-  ClProgramContext = CL_PROGRAM_CONTEXT,
-  ClProgramNumDevices = CL_PROGRAM_NUM_DEVICES,
-  ClProgramDevices = CL_PROGRAM_DEVICES,
-  ClProgramSource = CL_PROGRAM_SOURCE,
-  ClProgramBinarySizes = CL_PROGRAM_BINARY_SIZES,
-  ClProgramBinaries = CL_PROGRAM_BINARIES
+enum ProgramInfo {
+  ProgramReferenceCount = CL_PROGRAM_REFERENCE_COUNT,
+  ProgramContext = CL_PROGRAM_CONTEXT,
+  ProgramNumDevices = CL_PROGRAM_NUM_DEVICES,
+  ProgramDevices = CL_PROGRAM_DEVICES,
+  ProgramSource = CL_PROGRAM_SOURCE,
+  ProgramBinarySizes = CL_PROGRAM_BINARY_SIZES,
+  ProgramBinaries = CL_PROGRAM_BINARIES
 };
 
 /* cl_program_build_info */
-enum ClProgramBuildInfo {
-  ClProgramBuildStatus = CL_PROGRAM_BUILD_STATUS,
-  ClProgramBuildOptions = CL_PROGRAM_BUILD_OPTIONS,
-  ClProgramBuildLog = CL_PROGRAM_BUILD_LOG
+enum ProgramBuildInfo {
+  ProgramBuildStatus = CL_PROGRAM_BUILD_STATUS,
+  ProgramBuildOptions = CL_PROGRAM_BUILD_OPTIONS,
+  ProgramBuildLog = CL_PROGRAM_BUILD_LOG
 };
 
 /* cl_build_status */

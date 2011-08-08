@@ -3,7 +3,7 @@ Name:                hopencl
 -- The package version. See the Haskell package versioning policy
 -- (http://www.haskell.org/haskellwiki/Package_versioning_policy) for
 -- standards guiding when and how versions should be incremented.
-Version:             0.1
+Version:             0.1.1
 Synopsis:            Haskell bindings for OpenCL (spec v 1.1)
 -- Description:         n/a
 Homepage:            https://github.com/HIPERFIT/hopencl
@@ -27,6 +27,8 @@ Library
                    , Foreign.OpenCL.Bindings.Platform
                    , Foreign.OpenCL.Bindings.Device
                    , Foreign.OpenCL.Bindings.Context
+                   , Foreign.OpenCL.Bindings.CommandQueue
+                   , Foreign.OpenCL.Bindings.Program
                    , Foreign.OpenCL.Bindings
 
   Other-modules:
