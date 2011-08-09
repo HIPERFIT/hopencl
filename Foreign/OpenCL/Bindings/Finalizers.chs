@@ -5,7 +5,8 @@ module Foreign.OpenCL.Bindings.Finalizers (
   attachContextFinalizer,
   attachCommandQueueFinalizer,
   attachProgramFinalizer,
-  withForeignPtrs
+  attachKernelFinalizer,
+  attachEventFinalizer
 )
 where
 
@@ -39,11 +40,18 @@ attachProgramFinalizer = newForeignPtr clReleaseProgramFunPtr
 foreign import ccall "CL/cl.h &clReleaseProgram" clReleaseProgramFunPtr
    :: FunPtr (ClProgram -> IO ())
 
--- | Look at a list of foreign pointers, ensuring the pointers are not
--- freed for at least the duration of the computation.
-withForeignPtrs :: [ForeignPtr a] -> ([Ptr a] -> IO b) -> IO b
-withForeignPtrs ptrs f = with' ptrs []
-  where
-    with' [] ys = f (reverse ys)
-    with' (p:ps) ys = withForeignPtr p $ \p' -> with' ps (p':ys)
+-- Kernel Objects --
+attachKernelFinalizer :: ClKernel -> IO Kernel
+attachKernelFinalizer = newForeignPtr clReleaseKernelFunPtr
 
+-- Pointer to context release function
+foreign import ccall "CL/cl.h &clReleaseKernel" clReleaseKernelFunPtr
+   :: FunPtr (ClKernel -> IO ())
+
+-- Event Objects --
+attachEventFinalizer :: ClEvent -> IO Event
+attachEventFinalizer = newForeignPtr clReleaseEventFunPtr
+
+-- Pointer to context release function
+foreign import ccall "CL/cl.h &clReleaseEvent" clReleaseEventFunPtr
+   :: FunPtr (ClEvent -> IO ())

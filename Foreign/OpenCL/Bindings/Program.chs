@@ -20,8 +20,8 @@ import Foreign.OpenCL.Bindings.Util
 
 -- | Create a program from a string containing the source code
 --
-createProgram :: Context
-              -> String
+createProgram :: Context -- ^The context to associate the program with
+              -> String -- ^The program source
               -> IO Program -- ^The newly created program
 createProgram ctx str =
    withForeignPtr ctx $ \ctx_ptr ->

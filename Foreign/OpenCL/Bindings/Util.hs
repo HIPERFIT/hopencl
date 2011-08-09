@@ -1,4 +1,5 @@
-{-# LANGUAGE FlexibleInstances, UndecidableInstances, OverlappingInstances #-}
+{-# LANGUAGE FlexibleInstances, UndecidableInstances,
+             OverlappingInstances, ScopedTypeVariables #-}
 
 module Foreign.OpenCL.Bindings.Util where
 
@@ -77,3 +78,22 @@ genericGetInfo info getInfoFun handler =
 enumToBitfield :: (Bits a, Integral a, Enum b) => [b] -> a
 enumToBitfield = foldr ((.|.) . fromIntegral . fromEnum) 0
 
+-- | Look at a list of foreign pointers, ensuring the pointers are not
+-- freed for at least the duration of the computation.
+withForeignPtrs :: forall a b. [ForeignPtr a] -> ([Ptr a] -> IO b) -> IO b
+withForeignPtrs ptrs f = with' ptrs []
+  where
+    with' :: [ForeignPtr a] -> [Ptr a] -> IO b
+    with' [] ys = f (reverse ys)
+    with' (p:ps) ys = withForeignPtr p $ \p' -> with' ps (p':ys)
+
+-- | Create a null terminated array of values from a Haskell list.
+withArrayNull :: Storable a => [a] -> (Ptr a -> IO b) -> IO b
+withArrayNull [] f = f nullPtr
+withArrayNull xs f = withArray xs f
+
+-- | Create a null terminated array of values from a Haskell list, and
+-- compute the length of the list simultaneously.
+withArrayNullLen :: Storable a => [a] -> (Int -> Ptr a -> IO b) -> IO b
+withArrayNullLen [] f = f 0 nullPtr
+withArrayNullLen xs f = withArrayLen xs f

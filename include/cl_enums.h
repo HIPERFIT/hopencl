@@ -207,13 +207,13 @@ enum CommandQueueInfo {
 };
 
 /* cl_mem_flags */
-enum ClMemFlags {
-  ClMemReadWrite = CL_MEM_READ_WRITE,
-  ClMemWriteOnly = CL_MEM_WRITE_ONLY,
-  ClMemReadOnly = CL_MEM_READ_ONLY,
-  ClMemUseHostPtr = CL_MEM_USE_HOST_PTR,
-  ClMemAllocHostPtr = CL_MEM_ALLOC_HOST_PTR,
-  ClMemCopyHostPtr = CL_MEM_COPY_HOST_PTR
+enum MemFlags {
+  MemReadWrite = CL_MEM_READ_WRITE,
+  MemWriteOnly = CL_MEM_WRITE_ONLY,
+  MemReadOnly = CL_MEM_READ_ONLY,
+  MemUseHostPtr = CL_MEM_USE_HOST_PTR,
+  MemAllocHostPtr = CL_MEM_ALLOC_HOST_PTR,
+  MemCopyHostPtr = CL_MEM_COPY_HOST_PTR
 };
 
 /* cl_channel_order */
@@ -253,23 +253,23 @@ enum ClChannelType {
 };
 
 /* cl_mem_object_type */
-enum ClMemObjectType {
-  ClMemObjectBuffer = CL_MEM_OBJECT_BUFFER,
-  ClMemObjectImage2D = CL_MEM_OBJECT_IMAGE2D,
-  ClMemObjectImage3D = CL_MEM_OBJECT_IMAGE3D,
+enum MemObjectType {
+  MemObjectBuffer = CL_MEM_OBJECT_BUFFER,
+  MemObjectImage2D = CL_MEM_OBJECT_IMAGE2D,
+  MemObjectImage3D = CL_MEM_OBJECT_IMAGE3D,
 };
 
 /* cl_mem_info */
-enum ClMemInfo {
-  ClMemType = CL_MEM_TYPE,
-  ClMemFlags = CL_MEM_FLAGS,
-  ClMemSize = CL_MEM_SIZE,
-  ClMemHostPtr = CL_MEM_HOST_PTR,
-  ClMemMapCount = CL_MEM_MAP_COUNT,
-  ClMemReferenceCount = CL_MEM_REFERENCE_COUNT,
-  ClMemContext = CL_MEM_CONTEXT,
-  ClMemAssociatedMemobject = CL_MEM_ASSOCIATED_MEMOBJECT,
-  ClMemOffset = CL_MEM_OFFSET
+enum MemInfo {
+  MemType = CL_MEM_TYPE,
+  MemFlags = CL_MEM_FLAGS,
+  MemSize = CL_MEM_SIZE,
+  MemHostPtr = CL_MEM_HOST_PTR,
+  MemMapCount = CL_MEM_MAP_COUNT,
+  MemReferenceCount = CL_MEM_REFERENCE_COUNT,
+  MemContext = CL_MEM_CONTEXT,
+  MemAssociatedMemobject = CL_MEM_ASSOCIATED_MEMOBJECT,
+  MemOffset = CL_MEM_OFFSET
 };
 
 /* cl_image_info */
@@ -340,55 +340,55 @@ enum ClBuildStatus {
 };
 
 /* cl_kernel_info */
-enum ClKernelInfo {
-  ClKernelFunctionName = CL_KERNEL_FUNCTION_NAME,
-  ClKernelNumArgs = CL_KERNEL_NUM_ARGS,
-  ClKernelReferenceCount = CL_KERNEL_REFERENCE_COUNT,
-  ClKernelContext = CL_KERNEL_CONTEXT,
-  ClKernelProgram = CL_KERNEL_PROGRAM
+enum KernelInfo {
+  KernelFunctionName = CL_KERNEL_FUNCTION_NAME,
+  KernelNumArgs = CL_KERNEL_NUM_ARGS,
+  KernelReferenceCount = CL_KERNEL_REFERENCE_COUNT,
+  KernelContext = CL_KERNEL_CONTEXT,
+  KernelProgram = CL_KERNEL_PROGRAM
 };
 
 /* cl_kernel_work_group_info */
-enum ClKernelWorkGroupInfo {
-  ClKernelWorkGroupSize = CL_KERNEL_WORK_GROUP_SIZE,
-  ClKernelCompileWorkGroupSize = CL_KERNEL_COMPILE_WORK_GROUP_SIZE,
-  ClKernelLocalMemSize = CL_KERNEL_LOCAL_MEM_SIZE,
-  ClKernelPreferredWorkGroupSizeMultiple = CL_KERNEL_PREFERRED_WORK_GROUP_SIZE_MULTIPLE,
-  ClKernelPrivateMemSize = CL_KERNEL_PRIVATE_MEM_SIZE
+enum KernelWorkGroupInfo {
+  KernelWorkGroupSize = CL_KERNEL_WORK_GROUP_SIZE,
+  KernelCompileWorkGroupSize = CL_KERNEL_COMPILE_WORK_GROUP_SIZE,
+  KernelLocalMemSize = CL_KERNEL_LOCAL_MEM_SIZE,
+  KernelPreferredWorkGroupSizeMultiple = CL_KERNEL_PREFERRED_WORK_GROUP_SIZE_MULTIPLE,
+  KernelPrivateMemSize = CL_KERNEL_PRIVATE_MEM_SIZE
 };
 
 /* cl_event_info */
-enum ClEventInfo {
-  ClEventCommandQueue = CL_EVENT_COMMAND_QUEUE,
-  ClEventCommandType = CL_EVENT_COMMAND_TYPE,
-  ClEventReferenceCount = CL_EVENT_REFERENCE_COUNT,
-  ClEventCommandExecutionStatus = CL_EVENT_COMMAND_EXECUTION_STATUS,
-  ClEventContext = CL_EVENT_CONTEXT
+enum EventInfo {
+  EventCommandQueue = CL_EVENT_COMMAND_QUEUE,
+  EventCommandType = CL_EVENT_COMMAND_TYPE,
+  EventReferenceCount = CL_EVENT_REFERENCE_COUNT,
+  EventCommandExecutionStatus = CL_EVENT_COMMAND_EXECUTION_STATUS,
+  EventContext = CL_EVENT_CONTEXT
 };
 
 /* cl_command_type */
-enum ClCommandType {
-  ClCommandNdrangeKernel = CL_COMMAND_NDRANGE_KERNEL,
-  ClCommandTask = CL_COMMAND_TASK,
-  ClCommandNativeKernel = CL_COMMAND_NATIVE_KERNEL,
-  ClCommandReadBuffer = CL_COMMAND_READ_BUFFER,
-  ClCommandWriteBuffer = CL_COMMAND_WRITE_BUFFER,
-  ClCommandCopyBuffer = CL_COMMAND_COPY_BUFFER,
-  ClCommandReadImage = CL_COMMAND_READ_IMAGE,
-  ClCommandWriteImage = CL_COMMAND_WRITE_IMAGE,
-  ClCommandCopyImage = CL_COMMAND_COPY_IMAGE,
-  ClCommandCopyImageToBuffer = CL_COMMAND_COPY_IMAGE_TO_BUFFER,
-  ClCommandCopyBufferToImage = CL_COMMAND_COPY_BUFFER_TO_IMAGE,
-  ClCommandMapBuffer = CL_COMMAND_MAP_BUFFER,
-  ClCommandMapImage = CL_COMMAND_MAP_IMAGE,
-  ClCommandUnmapMemObject = CL_COMMAND_UNMAP_MEM_OBJECT,
-  ClCommandMarker = CL_COMMAND_MARKER,
-  ClCommandAcquireGlObjects = CL_COMMAND_ACQUIRE_GL_OBJECTS,
-  ClCommandReleaseGlObjects = CL_COMMAND_RELEASE_GL_OBJECTS,
-  ClCommandReadBufferRect = CL_COMMAND_READ_BUFFER_RECT,
-  ClCommandWriteBufferRect = CL_COMMAND_WRITE_BUFFER_RECT,
-  ClCommandCopyBufferRect = CL_COMMAND_COPY_BUFFER_RECT,
-  ClCommandUser = CL_COMMAND_USER
+enum CommandType {
+  CommandNdrangeKernel = CL_COMMAND_NDRANGE_KERNEL,
+  CommandTask = CL_COMMAND_TASK,
+  CommandNativeKernel = CL_COMMAND_NATIVE_KERNEL,
+  CommandReadBuffer = CL_COMMAND_READ_BUFFER,
+  CommandWriteBuffer = CL_COMMAND_WRITE_BUFFER,
+  CommandCopyBuffer = CL_COMMAND_COPY_BUFFER,
+  CommandReadImage = CL_COMMAND_READ_IMAGE,
+  CommandWriteImage = CL_COMMAND_WRITE_IMAGE,
+  CommandCopyImage = CL_COMMAND_COPY_IMAGE,
+  CommandCopyImageToBuffer = CL_COMMAND_COPY_IMAGE_TO_BUFFER,
+  CommandCopyBufferToImage = CL_COMMAND_COPY_BUFFER_TO_IMAGE,
+  CommandMapBuffer = CL_COMMAND_MAP_BUFFER,
+  CommandMapImage = CL_COMMAND_MAP_IMAGE,
+  CommandUnmapMemObject = CL_COMMAND_UNMAP_MEM_OBJECT,
+  CommandMarker = CL_COMMAND_MARKER,
+  CommandAcquireGlObjects = CL_COMMAND_ACQUIRE_GL_OBJECTS,
+  CommandReleaseGlObjects = CL_COMMAND_RELEASE_GL_OBJECTS,
+  CommandReadBufferRect = CL_COMMAND_READ_BUFFER_RECT,
+  CommandWriteBufferRect = CL_COMMAND_WRITE_BUFFER_RECT,
+  CommandCopyBufferRect = CL_COMMAND_COPY_BUFFER_RECT,
+  CommandUser = CL_COMMAND_USER
 };
 
 /* command execution status */

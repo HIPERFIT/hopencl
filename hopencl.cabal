@@ -28,7 +28,10 @@ Library
                    , Foreign.OpenCL.Bindings.Device
                    , Foreign.OpenCL.Bindings.Context
                    , Foreign.OpenCL.Bindings.CommandQueue
+                   , Foreign.OpenCL.Bindings.Event
                    , Foreign.OpenCL.Bindings.Program
+                   , Foreign.OpenCL.Bindings.Kernel
+                   , Foreign.OpenCL.Bindings.MemoryObject
                    , Foreign.OpenCL.Bindings
 
   Other-modules:

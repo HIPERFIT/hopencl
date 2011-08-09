@@ -5,7 +5,7 @@
 
 module Foreign.OpenCL.Bindings.Types (
   CPlatformID, CDeviceID, CContext, CCommandQueue, CProgram, CKernel, CEvent, CSampler,
-  ClContext, ClCommandQueue, ClProgram, ClKernel, ClEvent, ClSampler,
+  ClContext, ClCommandQueue, ClProgram, ClKernel, ClEvent, ClSampler, ClMem,
 
   PlatformID, DeviceID, Context, CommandQueue, Program, Kernel, Event, Sampler,
 
@@ -16,7 +16,13 @@ module Foreign.OpenCL.Bindings.Types (
 
   clFalse, clTrue,
 
-  PlatformInfo(..), ContextProperties(..), ContextInfo(..), DeviceType(..), DeviceInfo(..), DeviceFPConfig(..), DeviceMemCacheType(..), DeviceLocalMemType(..), DeviceExecCapabilities(..), CommandQueueProperties(..), CommandQueueInfo(..), ProgramInfo(..), ProgramBuildInfo(..)
+  PlatformInfo(..), ContextProperties(..), ContextInfo(..),
+  DeviceType(..), DeviceInfo(..), DeviceFPConfig(..), DeviceMemCacheType(..),
+  DeviceLocalMemType(..), DeviceExecCapabilities(..),
+  CommandQueueProperties(..), CommandQueueInfo(..),
+  ProgramInfo(..), ProgramBuildInfo(..), KernelInfo(..), KernelWorkGroupInfo(..),
+  EventInfo(..), CommandType(..),
+  MemFlags(..), MemInfo(..), MemObjectType(..),
 )
 where
 
@@ -115,18 +121,18 @@ clTrue = fromEnum ClTrue
 {#enum ClBuildStatus {} deriving (Show, Eq) #}
 
 -- Kernels
-{#enum ClKernelInfo {} deriving (Show, Eq) #}
-{#enum ClKernelWorkGroupInfo {} deriving (Show, Eq) #}
+{#enum KernelInfo {} deriving (Show, Eq) #}
+{#enum KernelWorkGroupInfo {} deriving (Show, Eq) #}
 
 -- Memory Objects
-{#enum ClMemFlags {} deriving (Show, Eq) #}
-{#enum ClMemObjectType {} deriving (Show, Eq) #}
-{#enum ClMemInfo {} deriving (Show, Eq) #}
+{#enum MemFlags {} deriving (Show, Eq) #}
+{#enum MemObjectType {} deriving (Show, Eq) #}
+{#enum MemInfo {} deriving (Show, Eq) #}
 {#enum ClBufferCreateType {} deriving (Show, Eq) #}
 
 -- Events
-{#enum ClEventInfo {} deriving (Show, Eq) #}
-{#enum ClCommandType {} deriving (Show, Eq) #}
+{#enum EventInfo {} deriving (Show, Eq) #}
+{#enum CommandType {} deriving (Show, Eq) #}
 
 -- Images
 {#enum ClChannelOrder {} deriving (Show, Eq) #}
