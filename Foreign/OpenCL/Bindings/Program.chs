@@ -2,7 +2,8 @@
 #include <CL/cl.h>
 
 module Foreign.OpenCL.Bindings.Program (
-   createProgram, programContext, programSource
+   createProgram, buildProgram,
+   programContext, programSource
   ) where
 
 import Control.Applicative

@@ -1,4 +1,4 @@
-{-# LANGUAGE ForeignFunctionInterface #-}
+{-# LANGUAGE ForeignFunctionInterface, GADTs #-}
 #include <CL/cl.h>
 
 module Foreign.OpenCL.Bindings.Kernel (
@@ -8,11 +8,13 @@ module Foreign.OpenCL.Bindings.Kernel (
    kernelWorkGroupSize, kernelLocalMemSize,
    kernelPreferredWorkGroupSizeMultiple, kernelPrivateMemSize,
 
-   enqueueNDRangeKernel
---   setKernelArg, setKernelArgs
+   enqueueNDRangeKernel, enqueueTask,
+
+   KernelArg(..), setKernelArg, setKernelArgs
   ) where
 
 import Control.Applicative
+import Control.Monad
 
 import Foreign
 import Foreign.C.String
@@ -22,6 +24,7 @@ import Foreign.Ptr
 {# import Foreign.OpenCL.Bindings.Types #}
 {# import Foreign.OpenCL.Bindings.Error #}
 {# import Foreign.OpenCL.Bindings.Finalizers #}
+{# import Foreign.OpenCL.Bindings.MemoryObject #}
 
 import Foreign.OpenCL.Bindings.Util
 
@@ -58,6 +61,28 @@ enqueueNDRangeKernel cq k globalWorkOffsets globalWorkSizes localWorkSizes waitE
        checkErrorA "clEnqueueNDRangeKernel" err
        attachEventFinalizer =<< peek eventPtr
   where workDim = fromIntegral . maximum $ map length [globalWorkOffsets, globalWorkSizes, localWorkSizes]
+
+data KernelArg where
+  MObjArg :: MemObject a -> KernelArg
+  VArg :: Storable a => a -> KernelArg
+
+setKernelArg :: Kernel -> Int -> KernelArg -> IO ()
+setKernelArg kernel n param =
+  withForeignPtr kernel $ \k ->
+  withPtr param $ \param_ptr -> do
+    err <- clSetKernelArg_ k (fromIntegral n) (size param) param_ptr
+    checkErrorA "clSetKernelArg" err
+      where size (MObjArg mobj) = fromIntegral $ sizeOf (memobjPtr mobj)
+            size (VArg v) = fromIntegral $ sizeOf v
+
+            withPtr :: KernelArg -> (Ptr () -> IO c) -> IO c
+            withPtr (MObjArg mobj) f = with (memobjPtr mobj) $ f . castPtr
+            withPtr (VArg v) f = with v $ f . castPtr
+
+
+setKernelArgs :: Kernel -> [KernelArg] -> IO ()
+setKernelArgs kernel args = zipWithM_ (setKernelArg kernel) [0..] args
+
 
 enqueueTask :: CommandQueue -> Kernel -> [Event] -> IO Event
 enqueueTask cq k waitEvs =
@@ -108,6 +133,7 @@ kernelPrivateMemSize kernel device =
 
 -- C interfacing functions
 clCreateKernel_ = {#call unsafe clCreateKernel #}
+clSetKernelArg_ = {#call unsafe clSetKernelArg #}
 
 clEnqueueNDRangeKernel_ = {#call unsafe clEnqueueNDRangeKernel #}
 clEnqueueTask_ = {#call unsafe clEnqueueTask #}

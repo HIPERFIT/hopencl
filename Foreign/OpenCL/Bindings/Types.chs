@@ -14,7 +14,7 @@ module Foreign.OpenCL.Bindings.Types (
 
   ClBitfield, ClBool, ClSize,
 
-  clFalse, clTrue,
+  clFalse, clTrue, toOCLBool,
 
   PlatformInfo(..), ContextProperties(..), ContextInfo(..),
   DeviceType(..), DeviceInfo(..), DeviceFPConfig(..), DeviceMemCacheType(..),
@@ -80,8 +80,13 @@ type ClBitfield = {#type cl_bitfield #}
 
 -- Boolean values
 {#enum ClBool {} deriving (Show, Eq) #}
-clFalse = fromEnum ClFalse
-clTrue = fromEnum ClTrue
+clFalse, clTrue :: ClUInt
+clFalse = fromIntegral $ fromEnum ClFalse
+clTrue = fromIntegral $ fromEnum ClTrue
+
+toOCLBool True = clTrue
+toOCLBool False = clFalse
+
 
 -- Platform
 {#enum PlatformInfo {} deriving (Show, Eq) #}
