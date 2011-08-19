@@ -33,6 +33,21 @@ instance ClGetInfo Bool where
       returnBool _ ptr = do b <- peek $ castPtr ptr
                             return (b /= clFalse)
 
+instance forall a. Storable a => ClGetInfo [a] where
+  getInfo getInfoFun i =
+    let info_code = fromIntegral $ fromEnum i
+    in alloca $ \sp -> do
+      -- Figure out how large the list is in bytes
+      getInfoFun info_code 0 nullPtr sp
+      size <- peek sp
+      -- Get the elements
+      allocaArray (fromIntegral size) $ \ptrs -> do
+        getInfoFun info_code size (castPtr ptrs) sp
+        size' <- peek sp
+        assert (size == size') "Inconsistent number of retrieved elements"
+        let n = fromIntegral size `div` (sizeOf (undefined :: a))
+        peekArray (fromIntegral n) ptrs
+
 -- A class for retrieving lists from OpenCL
 -- for instance, used in clGetPlatformIDs
 class ClGetList a where
@@ -49,6 +64,7 @@ instance Storable a => ClGetList a where
      n' <- peek num
      assert (n == n') "Inconsistent number of retrieved elements"
      peekArray (fromIntegral n') ptrs
+
 
 -- Calls "getInfoFun" to retrieve information about some OpenCL
 -- object. Then hands the resulting data in form of a pointer and size

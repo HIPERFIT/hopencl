@@ -16,7 +16,7 @@ module Foreign.OpenCL.Bindings.Types (
 
   clFalse, clTrue, toOCLBool,
 
-  PlatformInfo(..), ContextProperties(..), ContextInfo(..),
+  PlatformInfo(..), ContextProperties(..), ClContextProperties(..), ContextInfo(..),
   DeviceType(..), DeviceInfo(..), DeviceFPConfig(..), DeviceMemCacheType(..),
   DeviceLocalMemType(..), DeviceExecCapabilities(..),
   CommandQueueProperties(..), CommandQueueInfo(..),
@@ -92,19 +92,11 @@ toOCLBool False = clFalse
 {#enum PlatformInfo {} deriving (Show, Eq) #}
 
 -- Contexts
-{#enum ContextProperties {} deriving (Show, Eq) #}
+data ContextProperties = ContextPlatform PlatformID
+                         deriving (Show,Eq)
 
--- -- Contexts
--- data ClContextProperties = ClContextPropertiesPlatform ClPlatformID
---                          deriving (Show,Eq)
--- instance Enum ClContextProperties where
---   fromEnum ClContextPropertiesPlatform = 4228
+{#enum ClContextProperties {} deriving (Show, Eq) #}
 
---   toEnum 4228 = ClContextPropertiesPlatform
---   toEnum unmatched = error ("ClContextProperties.toEnum: Cannot match " ++ show unmatched)
-
-
--- data ClContextProperties = ClContextPlatform ClPlatformID
 
 {#enum ContextInfo {} deriving (Show, Eq) #}
 

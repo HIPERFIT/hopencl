@@ -38,9 +38,11 @@ queueContext queue = attachContextFinalizer =<< getCommandQueueInfo queue QueueC
 queueDevice :: CommandQueue -> IO DeviceID
 queueDevice queue = getCommandQueueInfo queue QueueDevice
 
--- TODO
 queueProperties :: CommandQueue -> IO [CommandQueueProperties]
-queueProperties queue = error "Retrieving the command queue properties is still not supported."
+queueProperties queue = do
+   props <- (getCommandQueueInfo queue QueueProperties)
+   return . filter ((/=0) . (.&.) props . fromEnum)
+      $ [QueueOutOfOrderExecModeEnable, QueueProfilingEnable]
 
 -- C interfacing functions
 clCreateCommandQueue_ = {#call unsafe clCreateCommandQueue #}

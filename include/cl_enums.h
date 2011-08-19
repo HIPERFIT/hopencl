@@ -194,8 +194,8 @@ enum ContextInfo {
 };
 
 /* cl_context_properties */
-enum ContextProperties {
-  ContextPlatform = CL_CONTEXT_PLATFORM
+enum ClContextProperties {
+  ClContextPlatform = CL_CONTEXT_PLATFORM
 };
 
 /* cl_command_queue_info */

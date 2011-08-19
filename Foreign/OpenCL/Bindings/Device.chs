@@ -20,15 +20,13 @@ module Foreign.OpenCL.Bindings.Device (
    deviceMaxClockFrequency, deviceMaxComputeUnits, deviceMaxConstantArgs,
    deviceMaxConstantBufferSize, deviceMaxMemAllocSize, deviceMaxParameterSize,
    deviceMaxReadImageArgs, deviceMaxSamplers, deviceMaxWorkGroupSize,
-   deviceMaxWorkItemDimensions,
---   deviceMaxWorkItemSizes,
+   deviceMaxWorkItemDimensions, deviceMaxWorkItemSizes,
    deviceMaxWriteImageArgs, deviceMemBaseAddrAlign, deviceMinDataTypeAlignSize,
    deviceName, devicePlatform, devicePreferredVectorWidthChar,
    devicePreferredVectorWidthShort, devicePreferredVectorWidthInt,
    devicePreferredVectorWidthLong, devicePreferredVectorWidthFloat,
    deviceProfile, deviceProfilingTimerResolution,
---   deviceQueueProperties,
-   deviceSingleFPConfig,
+   deviceQueueProperties, deviceSingleFPConfig,
    deviceType, deviceVendor, deviceVendorID, deviceVersion, deviceDriverVersion
  ) where
 
@@ -41,6 +39,10 @@ import Foreign.ForeignPtr
 {# import Foreign.OpenCL.Bindings.Error #}
 
 import Foreign.OpenCL.Bindings.Util
+
+import Foreign.Storable
+import Foreign.Marshal
+import Control.Monad
 
 -- ^Obtain a list of available platforms.
 getDeviceIDs ::  DeviceType -> PlatformID -> IO [DeviceID]
@@ -186,10 +188,19 @@ deviceMaxWorkGroupSize dev = getDeviceInfo dev DeviceMaxWorkGroupSize
 deviceMaxWorkItemDimensions :: DeviceID -> IO ClUInt
 deviceMaxWorkItemDimensions dev = getDeviceInfo dev DeviceMaxWorkItemDimensions
 
--- -- |Maximum number of work items that can be specified in each dimension of the
--- -- work-group when using the data parallel execution model.
--- deviceMaxWorkItemSizes :: Device -> IO (Array Int CSize)
--- deviceMaxWorkItemSizes dev =
+-- |Maximum number of work items that can be specified in each dimension of the
+-- work-group when using the data parallel execution model.
+deviceMaxWorkItemSizes :: DeviceID -> IO [CSize]
+deviceMaxWorkItemSizes dev = do
+   dim <- fromIntegral `fmap` deviceMaxWorkItemDimensions dev
+   let array_size = fromIntegral $ dim * (fromIntegral $ sizeOf (undefined :: CSize))
+   alloca $ \psize ->
+     allocaArray dim $ \arr -> do
+       clGetDeviceInfo_ dev (fromIntegral $ fromEnum DeviceMaxWorkItemSizes)
+                        array_size (castPtr arr) psize
+       size' <- peek psize
+       when (array_size /= size') $ error "Size mismatch in element size array"
+       mapM (peekElemOff arr) [0 .. dim - 1]
 
 -- |Maximum number of simultaneous image objects that can be written by a kernel
 deviceMaxWriteImageArgs :: DeviceID -> IO ClUInt
@@ -240,9 +251,13 @@ deviceProfile dev = getDeviceInfo dev DeviceProfile :: IO String
 deviceProfilingTimerResolution :: DeviceID -> IO CSize
 deviceProfilingTimerResolution dev = getDeviceInfo dev DeviceProfilingTimerResolution
 
--- -- |The command queue properties supported by the device
--- deviceQueueProperties :: DeviceID -> IO [CommandQueueProperties]
--- deviceQueueProperties dev =
+-- |The command queue properties supported by the device
+deviceQueueProperties :: DeviceID -> IO [CommandQueueProperties]
+deviceQueueProperties dev = do
+   cap <- (getDeviceInfo dev DeviceQueueProperties :: IO {#type cl_command_queue_properties #})
+   return . filter (\x -> cap .&. (fromIntegral $ fromEnum x) /= 0)
+      $ [QueueOutOfOrderExecModeEnable,
+         QueueProfilingEnable]
 
 -- |Describe the single precision floating point capability of the device
 deviceSingleFPConfig :: DeviceID -> IO [DeviceFPConfig]

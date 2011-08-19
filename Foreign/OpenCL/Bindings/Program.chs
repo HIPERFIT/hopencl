@@ -65,9 +65,9 @@ getBuildInfo program dev info =
 programContext :: Program -> IO Context
 programContext prog = attachContextFinalizer =<< getProgramInfo prog ProgramContext
 
--- TODO
---programDevice :: Program -> IO [DeviceID]
---programDevice prog = getProgramInfo queue ProgramDevices
+
+programDevice :: Program -> IO [DeviceID]
+programDevice prog = getProgramInfo prog ProgramDevices
 
 programSource :: Program -> IO String
 programSource prog = getProgramInfo prog ProgramSource

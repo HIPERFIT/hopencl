@@ -11,6 +11,8 @@ module Foreign.OpenCL.Bindings.MemoryObject (
    ) where
 
 import Control.Exception
+import Control.Monad
+import Data.Bits
 
 import Foreign.Storable
 import Foreign.C.Types
@@ -146,23 +148,15 @@ enqueueCopyBuffer q memobjSrc memobjDst offsetSrc offsetDst cb event_wait_list =
     checkErrorA "clEnqueueCopyBuffer" err
     attachEventFinalizer =<< peek event
 
--- TODO
--- memobjType :: MemObject a -> IO MemObjectType
--- memobjType memobj = do
---    typ <- (getMemObjectInfo memobj clMemObjectType :: IO CLMemObjectType)
---    return $
---       case typ of
---          (#const CL_MEM_OBJECT_BUFFER) -> MemObjectBuffer
---          (#const CL_MEM_OBJECT_IMAGE2D) -> MemObjectImage2D
---          (#const CL_MEM_OBJECT_IMAGE3D) -> MemObjectImage3D
---          _ -> error "Illegal memory cache type"
+memobjType :: MemObject a -> IO MemObjectType
+memobjType memobj = liftM toEnum $ getMemObjectInfo memobj MemType
 
--- memobjFlags :: MemObject a -> IO [MemObjectFlag]
--- memobjFlags memobj = do
---    cap <- (getMemObjectInfo memobj clMemObjectFlags :: IO CLMemObjectFlags)
---    return . filter ((/=) 0 . (.&.) cap . unMemObjectFlag)
---       $ [MemObjectReadWrite, MemObjectWriteOnly, MemObjectReadOnly,
---          MemObjectUseHostPtr, MemObjectAllocHostPtr, MemObjectCopyHostPtr]
+memobjFlags :: MemObject a -> IO [MemFlags]
+memobjFlags memobj = do
+   flags <- (getMemObjectInfo memobj MemFlags)
+   return . filter ((/=0) . (.&.) flags . fromEnum)
+      $ [MemReadWrite, MemWriteOnly, MemReadOnly,
+         MemUseHostPtr, MemAllocHostPtr, MemCopyHostPtr]
 
 memobjSize :: MemObject a -> IO CSize
 memobjSize memobj = getMemObjectInfo memobj MemSize
