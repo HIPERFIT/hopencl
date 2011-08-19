@@ -1,8 +1,4 @@
 Name:                hopencl
-
--- The package version. See the Haskell package versioning policy
--- (http://www.haskell.org/haskellwiki/Package_versioning_policy) for
--- standards guiding when and how versions should be incremented.
 Version:             0.1.1
 Synopsis:            Haskell bindings for OpenCL (spec v 1.1)
 -- Description:         n/a
@@ -14,9 +10,9 @@ Maintainer:          dybber@dybber.dk
 Copyright:           Copyright (c) 2011. Martin Dybdal <dybber@dybber.dk>
 
 Category:            Foreign
-Build-type:          Simple
+Build-type:          Custom
 Extra-source-files:  README
-Cabal-version:       >=1.2
+Cabal-version:       >=1.8
 
 Library
 -- Util and Finalizers shouldn't really be exposed.
@@ -54,3 +50,19 @@ Flag amd
 Flag cuda
   Description:          Use the location of headers used by CUDA based OpenCL
   Default:              False
+
+
+-- Testing
+
+flag test
+  description: Build test executable.
+  default:     True
+
+Executable hopencl_test
+  Main-is:       HOpenCL_Test.hs
+  Build-Depends: base >=4, QuickCheck >= 2, test-framework >= 0.4.0,
+                 test-framework-quickcheck2, HUnit, test-framework-hunit, hopencl
+  hs-source-dirs: test
+--  ghc-options:          -fhpc
+  if !flag(test)
+    buildable:     False
