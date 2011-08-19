@@ -1,0 +1,40 @@
+Write tests
+Code coverage of tests
+Write larger example program
+Implement the missing functionality (see below).
+
+
+The following "core" functionality is currently not supported by
+   HOpenCL:
+
+  clCreateContextFromType
+  clCreateSubBuffer
+  clEnqueueReadBufferRect
+  clEnqueueWriteBufferRect
+  clEnqueueCopyBufferRect
+  clEnqueueUnmapMemObject
+  clCreateProgramWithBinary
+  clUnloadCompiler
+  clEnqueueNativeKernel
+
+Events and synchronization:
+  clCreateContext: Support adding callback error function
+  clSetUserEventStatus
+  clWaitForEvents
+  clSetEventCallback
+
+  clEnqueueMarker
+  clEnqueueBarrier
+  clEnqueueWaitForEvents
+  clFlush
+  clFinish
+
+
+The following full sections of the OpenCL standard is not supported:
+---------------------------------------------------------------------
+ * Image Objects
+ * Sampler Objects
+ * Profiling of memory objects and kernels
+ * Extensions of the OpenCL standard
+ * OpenGL and D3D related functions
+
