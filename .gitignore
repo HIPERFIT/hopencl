@@ -1,1 +1,6 @@
 dist/
+*mix
+*tix
+examples/*/*.o
+examples/*/*.hi
+examples/test/test
