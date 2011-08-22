@@ -13,9 +13,9 @@ import Test_Util (oneOfM, void)
 --------------------
 --   Test suite   --
 --------------------
-tests = testGroup "CommandQueue"
-        [ testCase "Obtain context(s)" testCommandQueue
---        , testCommandQueueProps
+tests = testGroup "Command Queue"
+        [ testCase "Obtain queue(s)" testCommandQueue
+        , testCommandQueueProps
         ]
 
 testCommandQueueProps = buildTest $ do
@@ -24,13 +24,14 @@ testCommandQueueProps = buildTest $ do
   let pds = zip (map ContextPlatform platforms) devices
   cs <- forM pds $ \(p, ds) -> createContext ds [p]
   let cds = [(c, d) | c <- cs, ds <- devices, d <- ds]
-  -- queues <- forM (zip cs devices) $ \(c, ds) ->
-  --             forM ds $ \d ->
-  --               createCommandQueue c d [QueueOutOfOrderExecModeEnable]
   queues <- forM cds $ \(c, d) -> createCommandQueue c d [QueueProfilingEnable]
   return $ testGroup "CommandQueue properties"
-     [ --testCase "commandQueueDevice"    $ forM_ (zip cs cds) testCommandQueueDevice
---     , testCase "contextProperties" $ forM_ (zip cs platforms) testCommandQueueProperties
+     [ testCase "commandQueueContext"   $ forM_ (zip queues (map fst cds))
+                                                testCommandQueueContext
+     , testCase "commandQueueDevice"    $ forM_ (zip queues (map snd cds))
+                                                testCommandQueueDevice
+     , testCase "contextProperties" $ forM_ queues
+                                            (testCommandQueueProperties [QueueProfilingEnable])
      ]
 
 --------------------
@@ -47,10 +48,14 @@ testCommandQueue = do
                 createCommandQueue c d [QueueOutOfOrderExecModeEnable]
   return ()
 
--- testCommandQueueDevices (cs, devices) = do
---   devices' <- contextDevices cs
---   devices @=? devices'
+testCommandQueueContext (queue, context) = do
+  context' <- queueContext queue
+  context @=? context'
 
--- testCommandQueueProperties (cs, platform) = do
---   properties' <- contextProperties cs
---   [CommandQueuePlatform platform] @=? properties'
+testCommandQueueDevice (queue, device) = do
+  device' <- queueDevice queue
+  device @=? device'
+
+testCommandQueueProperties props queue = do
+  props' <- queueProperties queue
+  props @=? props'
