@@ -24,14 +24,15 @@ testCommandQueueProps = buildTest $ do
   let pds = zip (map ContextPlatform platforms) devices
   cs <- forM pds $ \(p, ds) -> createContext ds [p]
   let cds = [(c, d) | c <- cs, ds <- devices, d <- ds]
-  queues <- forM cds $ \(c, d) -> createCommandQueue c d [QueueProfilingEnable]
+  let properties = [QueueProfilingEnable]
+  queues <- forM cds $ \(c, d) -> createCommandQueue c d properties
   return $ testGroup "CommandQueue properties"
-     [ testCase "commandQueueContext"   $ forM_ (zip queues (map fst cds))
-                                                testCommandQueueContext
-     , testCase "commandQueueDevice"    $ forM_ (zip queues (map snd cds))
-                                                testCommandQueueDevice
-     , testCase "contextProperties" $ forM_ queues
-                                            (testCommandQueueProperties [QueueProfilingEnable])
+     [ testCase "queueContext"   $ forM_ (zip queues (map fst cds))
+                                         testQueueContext
+     , testCase "queueDevice"    $ forM_ (zip queues (map snd cds))
+                                         testQueueDevice
+     , testCase "queueProperties" $ forM_ queues
+                                          (testQueueProperties properties)
      ]
 
 --------------------
@@ -48,14 +49,14 @@ testCommandQueue = do
                 createCommandQueue c d [QueueOutOfOrderExecModeEnable]
   return ()
 
-testCommandQueueContext (queue, context) = do
+testQueueContext (queue, context) = do
   context' <- queueContext queue
   context @=? context'
 
-testCommandQueueDevice (queue, device) = do
+testQueueDevice (queue, device) = do
   device' <- queueDevice queue
   device @=? device'
 
-testCommandQueueProperties props queue = do
+testQueueProperties props queue = do
   props' <- queueProperties queue
   props @=? props'
