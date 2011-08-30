@@ -31,6 +31,8 @@ module Foreign.OpenCL.Bindings.Device (
  ) where
 
 import Data.Bits
+import Data.Word
+
 import Foreign.C.Types
 import Foreign.Ptr
 import Foreign.ForeignPtr
@@ -44,6 +46,7 @@ import Foreign.Storable
 import Foreign.Marshal
 import Control.Monad
 
+-- TODO shouldn't the first argument be a list of device types?
 -- ^Obtain a list of available platforms.
 getDeviceIDs ::  DeviceType -> PlatformID -> IO [DeviceID]
 getDeviceIDs typ platform =
@@ -67,8 +70,8 @@ clGetDeviceInfo_ device name size value size_ret =
 
 ------- Below are the device info query functions --------
 -- |The compute device address space size in bits.
-deviceAddressBits :: DeviceID -> IO ClUInt
-deviceAddressBits dev = getDeviceInfo dev DeviceAddressBits
+deviceAddressBits :: DeviceID -> IO Word32
+deviceAddressBits dev = fromIntegral `fmap` (getDeviceInfo dev DeviceAddressBits :: IO ClUInt)
 
 -- |True if the device is available.
 deviceAvailable :: DeviceID -> IO Bool
@@ -147,12 +150,12 @@ deviceLocalMemType dev = do
    return . toEnum $ fromIntegral typ
 
 -- |Maximum configured clock frequency of the device in MHz
-deviceMaxClockFrequency :: DeviceID -> IO ClUInt
-deviceMaxClockFrequency dev = getDeviceInfo dev DeviceMaxClockFrequency
+deviceMaxClockFrequency :: DeviceID -> IO Word32
+deviceMaxClockFrequency dev = fromIntegral `fmap` (getDeviceInfo dev DeviceMaxClockFrequency :: IO ClUInt)
 
 -- |The number of parallel compute cos on the device
-deviceMaxComputeUnits :: DeviceID -> IO ClUInt
-deviceMaxComputeUnits dev = getDeviceInfo dev DeviceMaxComputeUnits
+deviceMaxComputeUnits :: DeviceID -> IO Word32
+deviceMaxComputeUnits dev = fromIntegral `fmap` (getDeviceInfo dev DeviceMaxComputeUnits :: IO ClUInt)
 
 -- |Max number of constant arguments to a kernel
 deviceMaxConstantArgs :: DeviceID -> IO ClUInt
