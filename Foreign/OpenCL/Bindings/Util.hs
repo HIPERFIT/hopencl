@@ -26,6 +26,11 @@ instance Storable a => ClGetInfo a where
      where
        returnFun _ ptr = peek $ castPtr ptr
 
+-- instance ClGetInfo (Ptr a) where
+--    getInfo getInfoFun i = genericGetInfo i getInfoFun returnFun
+--      where
+--        returnFun _ ptr = castPtr ptr
+
 instance ClGetInfo Bool where
   getInfo getInfoFun i = genericGetInfo i getInfoFun returnBool
     where
@@ -113,3 +118,27 @@ withArrayNull xs f = withArray xs f
 withArrayNullLen :: Storable a => [a] -> (Int -> Ptr a -> IO b) -> IO b
 withArrayNullLen [] f = f 0 nullPtr
 withArrayNullLen xs f = withArrayLen xs f
+
+allocaArrays :: Storable a => [Int] -> ([Ptr a] -> IO b) -> IO b
+allocaArrays ns f  = go ns []
+  where
+    go [] ptrs = f ptrs
+    go (n:ns) ptrs = allocaArray n $ \ptr ->
+                        go ns (ptr : ptrs)
+
+withArrays :: Storable a => [[a]] -> ([Ptr a] -> IO b) -> IO b
+withArrays xs f  = withArraysLen xs (const f)
+
+withArraysLen :: Storable a => [[a]] -> (Int -> [Ptr a] -> IO b) -> IO b
+withArraysLen xs f  = go xs 0 []
+  where
+    go [] n ptrs = f n ptrs
+    go (x:xs) n ptrs = withArray x $ \ptr ->
+                         go xs (n+1) (ptr : ptrs)
+
+withMany :: Storable a => [a] -> ([Ptr a] -> IO b) -> IO b
+withMany xs f  = go xs []
+  where
+    go [] ptrs = f ptrs
+    go (x:xs) ptrs = with x $ \ptr -> go xs (ptr : ptrs)
+

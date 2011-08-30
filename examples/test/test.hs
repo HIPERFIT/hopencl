@@ -1,7 +1,10 @@
 import Control.Monad
+import Control.Applicative
 
 import Foreign.OpenCL.Bindings
 import Foreign.Storable
+
+import qualified Data.ByteString as B
 
 platformInfoFn = [
   platformName,
@@ -36,12 +39,25 @@ main = do
   sequence_ [info d >>= putStrLn . ("    " ++) |
                d <- devices,
                info <- deviceInfoFn]
-  context <- createContext devices
+  context <- createContext devices [ContextPlatform (head ps)]
+  putStrLn "Context created"
   let device = head devices
   queue <- createCommandQueue context device [QueueOutOfOrderExecModeEnable]
   prog <- createProgram context source
   buildProgram prog [device] ""
-  kernel <- createKernel prog "vectorAdd"
+  putStrLn "Program created and build"
+  (devs, bins) <- unzip <$> programBinaries prog
+  print devs
+  print $ length bins
+  B.writeFile "test1.clbin" $ head bins
+  prog2 <- createProgramWithBinary context (zip devs bins)
+  buildProgram prog2 [device] ""
+  (devs2, bins2) <- unzip <$> programBinaries prog2
+  print devs2
+  print bins2
+  B.writeFile "test2.clbin" $ head bins2
+  kernel <- createKernel prog2 "vectorAdd"
+  print "success"
   buffer0 <- newListArray context array0
   buffer1 <- newListArray context array1
   buffer_out <- mallocArray context [MemWriteOnly] dim

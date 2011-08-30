@@ -15,24 +15,25 @@ Extra-source-files:  README
 Cabal-version:       >=1.8
 
 Library
--- Util and Finalizers shouldn't really be exposed.
-  Exposed-modules:   Foreign.OpenCL.Bindings.Types
-                   , Foreign.OpenCL.Bindings.Util
-                   , Foreign.OpenCL.Bindings.Error
-                   , Foreign.OpenCL.Bindings.Finalizers
-                   , Foreign.OpenCL.Bindings.Platform
-                   , Foreign.OpenCL.Bindings.Device
-                   , Foreign.OpenCL.Bindings.Context
-                   , Foreign.OpenCL.Bindings.CommandQueue
-                   , Foreign.OpenCL.Bindings.Event
-                   , Foreign.OpenCL.Bindings.MemoryObject
-                   , Foreign.OpenCL.Bindings.Program
-                   , Foreign.OpenCL.Bindings.Kernel
-                   , Foreign.OpenCL.Bindings
+  Exposed-modules:   Foreign.OpenCL.Bindings
 
-  Other-modules:
+  Other-modules:     Foreign.OpenCL.Bindings.Finalizers
+                     Foreign.OpenCL.Bindings.Util
+                     Foreign.OpenCL.Bindings.Types
+                     Foreign.OpenCL.Bindings.Error
+                     Foreign.OpenCL.Bindings.Platform
+                     Foreign.OpenCL.Bindings.Device
+                     Foreign.OpenCL.Bindings.Context
+                     Foreign.OpenCL.Bindings.CommandQueue
+                     Foreign.OpenCL.Bindings.Event
+                     Foreign.OpenCL.Bindings.MemoryObject
+                     Foreign.OpenCL.Bindings.Program
+                     Foreign.OpenCL.Bindings.Kernel
 
-  Build-depends:     base >= 4 && < 5
+  Build-depends:     base >= 4 && < 5,
+                     binary,
+                     bytestring
+
   Build-tools:       c2hs
   Extra-Libraries:   OpenCL
   Include-dirs: include

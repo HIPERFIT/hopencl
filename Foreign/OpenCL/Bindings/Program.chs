@@ -2,21 +2,25 @@
 #include <CL/cl.h>
 
 module Foreign.OpenCL.Bindings.Program (
-   createProgram, buildProgram,
-   programContext, programSource
+   createProgram, createProgramWithBinary,
+   buildProgram,
+   programContext, programDevices, programSource, programBinaries
   ) where
 
 import Control.Applicative
+import Control.Monad
 
-import Foreign
+import Foreign hiding (withMany)
 import Foreign.C.Types
 import Foreign.C.String
 import Foreign.Ptr
 
+import Data.Binary
+import qualified Data.ByteString as B
+
 {# import Foreign.OpenCL.Bindings.Types #}
 {# import Foreign.OpenCL.Bindings.Error #}
 {# import Foreign.OpenCL.Bindings.Finalizers #}
-
 import Foreign.OpenCL.Bindings.Util
 
 -- | Create a program from a string containing the source code
@@ -33,6 +37,35 @@ createProgram ctx str =
       prog <- clCreateProgramWithSource_ ctx_ptr 1 cstr_ptr len_ptr ep
       checkErrorA "clCreateProgramWithSource" =<< peek ep
       attachProgramFinalizer prog
+
+-- | Create a program from the ByteStrings obtained from
+-- programBinaries
+--
+createProgramWithBinary :: Context -- ^The context to associate the program with
+                        -> [(DeviceID, B.ByteString)] -- ^Binary program specific to different devices
+                        -> IO Program -- ^The newly created program
+createProgramWithBinary ctx devs_and_bins =
+   let (devices, binaries) = unzip devs_and_bins
+       lengths = map (fromIntegral . B.length) binaries
+       words = map (map fromIntegral . B.unpack) binaries
+   in withForeignPtr ctx $ \ctx_ptr ->
+      withArrayLen devices $ \n dev_arr ->
+      allocaArray n $ \binary_status ->
+      alloca $ \ep ->
+      withArrays words $ \bin_arr_list ->
+      withArray bin_arr_list $ \bin_arr ->
+      withArray lengths $ \length_arr -> do
+        prog <- clCreateProgramWithBinary_ ctx_ptr (fromIntegral n) dev_arr length_arr
+                                           bin_arr binary_status ep
+        checkErrorA "createProgramWithBinary" =<< peek ep
+        mapM_ (checkErrorA "createProgramWithBinary -") =<< peekArray n binary_status
+        attachProgramFinalizer prog
+
+-- unsafeWithInternals :: B.ByteString -> (Ptr Word8 -> Int -> IO a) -> IO a
+-- unsafeWithInternals ps f
+--  = case BI.toForeignPtr ps of
+--    (fp,s,l) -> withForeignPtr fp $ \p -> f (p `plusPtr` s) l
+
 
 buildProgram :: Program -> [DeviceID] -> String -> IO ()
 buildProgram p devs opts =
@@ -65,12 +98,35 @@ getBuildInfo program dev info =
 programContext :: Program -> IO Context
 programContext prog = attachContextFinalizer =<< getProgramInfo prog ProgramContext
 
-
-programDevice :: Program -> IO [DeviceID]
-programDevice prog = getProgramInfo prog ProgramDevices
+programDevices :: Program -> IO [DeviceID]
+programDevices prog = getProgramInfo prog ProgramDevices
 
 programSource :: Program -> IO String
 programSource prog = getProgramInfo prog ProgramSource
+
+-- Collects binaries for an unspecified subset of the devices
+-- associated with the program (depending on which it is compiled to=
+programBinaries :: Program -> IO [(DeviceID, B.ByteString)]
+programBinaries prog =
+  withForeignPtr prog $ \program_ptr -> do
+    devices  <- programDevices prog
+    sizes    <- (getProgramInfo prog ProgramBinarySizes :: IO [ClSize])
+    allocaArrays (map fromIntegral sizes) $ \ptrs ->
+      withArrayLen ptrs $ \n ptrs_array -> do
+        let info_code = fromIntegral $ fromEnum ProgramBinaries
+            bytes = fromIntegral $ n * sizeOf (head ptrs)
+        err <- clGetProgramInfo_ program_ptr info_code bytes
+                                 (castPtr ptrs_array) nullPtr
+        checkErrorA "programBinaries" err
+        bin_ptrs <- peekArray n ptrs_array
+        binaries <- foldM readBinary [] $ zip sizes bin_ptrs
+        return $ zip devices binaries
+  where
+    readBinary :: [B.ByteString] -> (ClSize, Ptr Word8) -> IO [B.ByteString]
+    readBinary bs (0, ptr) = return bs
+    readBinary bs (size, ptr) = do
+      str <- B.pack <$> peekArray (fromIntegral size) ptr
+      return $ str : bs
 
 -- C interfacing functions
 clCreateProgramWithSource_ = {#call unsafe clCreateProgramWithSource #}
@@ -78,6 +134,8 @@ clCreateProgramWithSource_ = {#call unsafe clCreateProgramWithSource #}
 clBuildProgram_ = {#call unsafe clBuildProgram #}
 
 clGetProgramBuildInfo_ = {#call unsafe clGetProgramBuildInfo #}
+
+clCreateProgramWithBinary_ = {#call unsafe clCreateProgramWithBinary #}
 
 clGetProgramInfo_ program name size value size_ret =
   do errcode <- {#call unsafe clGetProgramInfo #} program name size value size_ret
