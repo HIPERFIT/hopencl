@@ -65,19 +65,33 @@ enqueueNDRangeKernel cq k globalWorkOffsets globalWorkSizes localWorkSizes waitE
 data KernelArg where
   MObjArg :: MemObject a -> KernelArg
   VArg :: Storable a => a -> KernelArg
+  StructArg :: Storable a => [a] -> KernelArg
 
 setKernelArg :: Kernel -> Int -> KernelArg -> IO ()
 setKernelArg kernel n param =
   withForeignPtr kernel $ \k ->
   withPtr param $ \param_ptr -> do
     err <- clSetKernelArg_ k (fromIntegral n) (size param) param_ptr
-    checkErrorA "clSetKernelArg" err
+    case toEnum $ fromIntegral err of
+      ClInvalidArgSize -> error $ "ClInvalidArgSize occurred in call to: clSetKernelArg. Argument #"
+                                  ++ show n ++ " was set to size " ++ show (size param)
+      _ -> checkErrorA "clSetKernelArg" err
       where size (MObjArg mobj) = fromIntegral $ sizeOf (memobjPtr mobj)
             size (VArg v) = fromIntegral $ sizeOf v
+            size (StructArg xs) = fromIntegral . sum $ map sizeOf xs
 
             withPtr :: KernelArg -> (Ptr () -> IO c) -> IO c
             withPtr (MObjArg mobj) f = with (memobjPtr mobj) $ f . castPtr
             withPtr (VArg v) f = with v $ f . castPtr
+            withPtr a@(StructArg xs) f = do
+              allocaBytes (fromIntegral $ size a) $ \ptr -> do
+                pokeElems ptr xs
+                f (castPtr ptr)
+
+            pokeElems :: Storable a => Ptr a -> [a] -> IO ()
+            pokeElems ptr (x:xs) = poke ptr x >> pokeElems (plusPtr ptr (sizeOf x)) xs
+            pokeElems _ [] = return ()
+
 
 
 setKernelArgs :: Kernel -> [KernelArg] -> IO ()

@@ -35,6 +35,7 @@ Library
                      binary,
                      bytestring
 
+  Ghc-options:          -O2 -Wall -fno-warn-name-shadowing -fno-warn-type-defaults
   Default-language: Haskell98
   Build-tools:       c2hs
   Extra-Libraries:   OpenCL
