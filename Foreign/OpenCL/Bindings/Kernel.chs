@@ -64,6 +64,7 @@ enqueueNDRangeKernel cq k globalWorkOffsets globalWorkSizes localWorkSizes waitE
 
 data KernelArg where
   MObjArg :: MemObject a -> KernelArg
+  LocalArrayArg :: Storable a => a -> Int -> KernelArg
   VArg :: Storable a => a -> KernelArg
   StructArg :: Storable a => [a] -> KernelArg
 
@@ -79,10 +80,12 @@ setKernelArg kernel n param =
       where size (MObjArg mobj) = fromIntegral $ sizeOf (memobjPtr mobj)
             size (VArg v) = fromIntegral $ sizeOf v
             size (StructArg xs) = fromIntegral . sum $ map sizeOf xs
+            size (LocalArrayArg x n) = fromIntegral $ n * sizeOf x        
 
             withPtr :: KernelArg -> (Ptr () -> IO c) -> IO c
             withPtr (MObjArg mobj) f = with (memobjPtr mobj) $ f . castPtr
             withPtr (VArg v) f = with v $ f . castPtr
+            withPtr (LocalArrayArg _ _) f = f nullPtr
             withPtr a@(StructArg xs) f = do
               allocaBytes (fromIntegral $ size a) $ \ptr -> do
                 pokeElems ptr xs
