@@ -38,7 +38,7 @@ Library
                      binary,
                      bytestring
 
-  GHC-options:       -O2 -Wall -fno-warn-name-shadowing -fno-warn-type-defaults
+  GHC-options:       -Wall -fno-warn-name-shadowing -fno-warn-type-defaults -fhpc
   Default-language:  Haskell98
   Build-tools:       c2hs
   Extra-Libraries:   OpenCL
@@ -50,7 +50,7 @@ Test-suite unit
   hs-source-dirs:    tests/unit
   Main-is:           HOpenCL_Test.hs
   Default-language:  Haskell98
-  GHC-options:       -Wall
+  GHC-options:       -Wall 
   Build-Depends:     base >=4, QuickCheck >= 2, test-framework >= 0.4.0,
                      test-framework-quickcheck2, HUnit,
                      test-framework-hunit, hopencl
