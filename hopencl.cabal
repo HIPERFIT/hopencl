@@ -1,22 +1,24 @@
 Name:                hopencl
 Version:             0.1.1
 Synopsis:            Haskell bindings for OpenCL (spec v 1.1)
--- Description:         n/a
+Description:         N/A
 Homepage:            https://github.com/HIPERFIT/hopencl
+Bug-reports:         https://github.com/HIPERFIT/hopencl/issues
 License:             BSD3
 License-file:        LICENSE
-Author:              Martin Dybdal
-Maintainer:          dybber@dybber.dk
+Author:              Martin Dybdal <dybber@dybber.dk>
+Maintainer:          Martin Dybdal <dybber@dybber.dk>
 Copyright:           Copyright (c) 2011. Martin Dybdal <dybber@dybber.dk>
 Category:            Foreign
 
+Tested-with:         GHC == 7.0.3
 Build-type:          Custom
 Cabal-version:       >= 1.10
 Extra-source-files:  README
 
 
 Library
-  Other-modules:   Foreign.OpenCL.Bindings.Types
+  Other-modules:     Foreign.OpenCL.Bindings.Types
                      Foreign.OpenCL.Bindings.Finalizers
                      Foreign.OpenCL.Bindings.Util
                      Foreign.OpenCL.Bindings.Error
@@ -36,25 +38,23 @@ Library
                      binary,
                      bytestring
 
-  Ghc-options:          -O2 -Wall -fno-warn-name-shadowing -fno-warn-type-defaults
-  Default-language: Haskell98
+  GHC-options:       -O2 -Wall -fno-warn-name-shadowing -fno-warn-type-defaults
+  Default-language:  Haskell98
   Build-tools:       c2hs
   Extra-Libraries:   OpenCL
-  Include-dirs: include
-  Extra-lib-dirs: /usr/lib/OpenCL/
-
-Flag amd
-  Description:          Use the AMD location of include and object files
-  Default:              True
-
-Flag cuda
-  Description:          Use the location of headers used by CUDA based OpenCL
-  Default:              False
+  Include-dirs:      include
+  Extra-lib-dirs:    /usr/lib/OpenCL/
 
 Test-suite unit
-  type:             exitcode-stdio-1.0
-  hs-source-dirs:   tests/unit
-  Main-is:          HOpenCL_Test.hs
-  Default-language: Haskell98
-  Build-Depends: base >=4, QuickCheck >= 2, test-framework >= 0.4.0,
-                 test-framework-quickcheck2, HUnit, test-framework-hunit, hopencl
+  Type:              exitcode-stdio-1.0
+  hs-source-dirs:    tests/unit
+  Main-is:           HOpenCL_Test.hs
+  Default-language:  Haskell98
+  GHC-options:       -Wall
+  Build-Depends:     base >=4, QuickCheck >= 2, test-framework >= 0.4.0,
+                     test-framework-quickcheck2, HUnit,
+                     test-framework-hunit, hopencl
+
+Source-repository head
+  type: git
+  location: http://github.com/HIPERFIT/hopencl
