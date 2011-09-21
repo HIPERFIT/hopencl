@@ -41,12 +41,7 @@ Library
   Build-tools:       c2hs
   Extra-Libraries:   OpenCL
   Include-dirs: include
-
-  if flag(amd)
-    Extra-lib-dirs: /usr/lib/OpenCL/
-    Include-dirs: /home/dybber/lib/ati-stream-sdk-v2.3-lnx64/include/
-  if flag(cuda)
-    Include-dirs: /usr/local/cuda/include/
+  Extra-lib-dirs: /usr/lib/OpenCL/
 
 Flag amd
   Description:          Use the AMD location of include and object files
