@@ -30,6 +30,7 @@ Library
                      Foreign.OpenCL.Bindings.MemoryObject
                      Foreign.OpenCL.Bindings.Program
                      Foreign.OpenCL.Bindings.Kernel
+                     Foreign.OpenCL.Bindings.Synchronization
 
   Exposed-modules:   Foreign.OpenCL.Bindings
 

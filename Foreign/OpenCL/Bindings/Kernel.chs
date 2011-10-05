@@ -76,6 +76,8 @@ setKernelArg kernel n param =
     case toEnum $ fromIntegral err of
       ClInvalidArgSize -> error $ "ClInvalidArgSize occurred in call to: clSetKernelArg. Argument #"
                                   ++ show n ++ " was set to size " ++ show (size param)
+      ClInvalidArgIndex -> error $ "ClInvalidArgIndex occurred in call to: clSetKernelArg, when setting argument #"
+                                  ++ show n
       _ -> checkErrorA "clSetKernelArg" err
       where size (MObjArg mobj) = fromIntegral $ sizeOf (memobjPtr mobj)
             size (VArg v) = fromIntegral $ sizeOf v

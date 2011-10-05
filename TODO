@@ -1,40 +1,43 @@
-Write tests
-Code coverage of tests
-Write larger example program
-Implement the missing functionality (see below).
 
+Tasks:
+  - Write tests
+      - clCreateContextFromType
+      - clCreateProgramWithBinary
+      - clUnloadCompiler
+      - Synchronization primitives
+      - callback functions and clSetUserEventStatus
+  - Code coverage of tests
+  - Write larger example program (for instance, port an example
+    program from AMD or NVIDIA OpenCL distribution)
+  - Write documentation and verify that the haddock output looks nice
+  - Implement the missing functionality (see below).
 
-The following "core" functionality is currently not supported by
-   HOpenCL:
+Use clCreateProgramWithBinary and programBinaries to implement a
+ file based storage of compiled kernels
 
-  clCreateContextFromType
+  clCreateContextFromType: 
+    Support adding callback error function
+
+Define new callback datatype (like Maybe) and combine createContext
+   and createContextWithCallback
+
+Extend CommandExecStatus to include negativ error values (see
+   setEventCallback and page 145 in the opencl spec v1.1)
+
+The following operations are currently not supported by HOpenCL:
+----------------------------------------------------------------
   clCreateSubBuffer
   clEnqueueReadBufferRect
   clEnqueueWriteBufferRect
   clEnqueueCopyBufferRect
+  clEnqueueMapBuffer
   clEnqueueUnmapMemObject
-  clCreateProgramWithBinary
-  clUnloadCompiler
   clEnqueueNativeKernel
 
-Events and synchronization:
-  clCreateContext: Support adding callback error function
-  clSetUserEventStatus
-  clWaitForEvents
-  clSetEventCallback
-
-  clEnqueueMarker
-  clEnqueueBarrier
-  clEnqueueWaitForEvents
-  clFlush
-  clFinish
-
-
 The following full sections of the OpenCL standard is not supported:
----------------------------------------------------------------------
- * Image Objects
- * Sampler Objects
- * Profiling of memory objects and kernels
- * Extensions of the OpenCL standard
+--------------------------------------------------------------------
+ * Image Objects (section 5.3)
+ * Sampler Objects (section 5.5)
+ * Profiling of memory objects and kernels (section 5.12)
+ * Extensions of the OpenCL standard involving the API
  * OpenGL and D3D related functions
-

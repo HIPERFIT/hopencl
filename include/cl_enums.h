@@ -392,11 +392,11 @@ enum CommandType {
 };
 
 /* command execution status */
-enum ClCommandExecStatus {
-  ClComplete = CL_COMPLETE,
-  ClRunning = CL_RUNNING,
-  ClSubmitted = CL_SUBMITTED,
-  ClQueued = CL_QUEUED
+enum CommandExecStatus {
+  Complete = CL_COMPLETE,
+  Running = CL_RUNNING,
+  Submitted = CL_SUBMITTED,
+  Queued = CL_QUEUED
 };
 
 /* cl_buffer_create_type */

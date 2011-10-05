@@ -19,7 +19,7 @@ module Foreign.OpenCL.Bindings.Types (
   PlatformInfo(..), ContextProperties(..), ClContextProperties(..), ContextInfo(..),
   DeviceType(..), DeviceInfo(..), DeviceFPConfig(..), DeviceMemCacheType(..),
   DeviceLocalMemType(..), DeviceExecCapabilities(..),
-  CommandQueueProperties(..), CommandQueueInfo(..),
+  CommandQueueProperties(..), CommandQueueInfo(..), CommandExecStatus(..),
   ProgramInfo(..), ProgramBuildInfo(..), KernelInfo(..), KernelWorkGroupInfo(..),
   EventInfo(..), CommandType(..),
   MemFlags(..), MemInfo(..), MemObjectType(..),
@@ -111,6 +111,8 @@ data ContextProperties = ContextPlatform PlatformID
 -- Command Queue
 {#enum CommandQueueInfo {} deriving (Show, Eq) #}
 {#enum CommandQueueProperties {} deriving (Show, Eq) #}
+{#enum CommandExecStatus {} deriving (Show, Eq) #}
+
 
 -- Program objects
 {#enum ProgramInfo {} deriving (Show, Eq) #}
