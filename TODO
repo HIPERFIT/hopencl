@@ -15,14 +15,7 @@ Tasks:
 Use clCreateProgramWithBinary and programBinaries to implement a
  file based storage of compiled kernels
 
-  clCreateContextFromType: 
-    Support adding callback error function
-
-Define new callback datatype (like Maybe) and combine createContext
-   and createContextWithCallback
-
-Extend CommandExecStatus to include negativ error values (see
-   setEventCallback and page 145 in the opencl spec v1.1)
+Should getDeviceIDs take a list of device types?
 
 The following operations are currently not supported by HOpenCL:
 ----------------------------------------------------------------

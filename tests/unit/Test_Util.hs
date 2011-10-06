@@ -1,7 +1,6 @@
 module Test_Util where
 
 import Test.HUnit (assertBool, Assertion)
-import Control.Monad
 
 oneOf :: (Eq a, Show a) => a -> [a] -> Assertion
 oneOf x ys = assertBool msg (x `elem` ys)

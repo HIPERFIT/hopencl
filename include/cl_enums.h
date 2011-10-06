@@ -2,57 +2,57 @@
 
 /* Error Codes */
 enum ClError {
-  ClSuccess = CL_SUCCESS,
-  ClDeviceNotFound = CL_DEVICE_NOT_FOUND,
-  ClDeviceNotAvailable = CL_DEVICE_NOT_AVAILABLE,
-  ClCompilerNotAvailable = CL_COMPILER_NOT_AVAILABLE,
-  ClMemObjectAllocationFailure = CL_MEM_OBJECT_ALLOCATION_FAILURE,
-  ClOutOfResources = CL_OUT_OF_RESOURCES,
-  ClOutOfHostMemory = CL_OUT_OF_HOST_MEMORY,
-  ClProfilingInfoNotAvailable = CL_PROFILING_INFO_NOT_AVAILABLE,
-  ClMemCopyOverlap = CL_MEM_COPY_OVERLAP,
-  ClImageFormatMismatch = CL_IMAGE_FORMAT_MISMATCH,
-  ClImageFormatNotSupported = CL_IMAGE_FORMAT_NOT_SUPPORTED,
-  ClBuildProgramFailure = CL_BUILD_PROGRAM_FAILURE,
-  ClMapFailure = CL_MAP_FAILURE,
-  ClMisalignedSubBufferOffset = CL_MISALIGNED_SUB_BUFFER_OFFSET,
-  ClExecStatusErrorForEventsInWaitList = CL_EXEC_STATUS_ERROR_FOR_EVENTS_IN_WAIT_LIST,
+  Success = CL_SUCCESS,
+  DeviceNotFound = CL_DEVICE_NOT_FOUND,
+  DeviceNotAvailable = CL_DEVICE_NOT_AVAILABLE,
+  CompilerNotAvailable = CL_COMPILER_NOT_AVAILABLE,
+  MemObjectAllocationFailure = CL_MEM_OBJECT_ALLOCATION_FAILURE,
+  OutOfResources = CL_OUT_OF_RESOURCES,
+  OutOfHostMemory = CL_OUT_OF_HOST_MEMORY,
+  ProfilingInfoNotAvailable = CL_PROFILING_INFO_NOT_AVAILABLE,
+  MemCopyOverlap = CL_MEM_COPY_OVERLAP,
+  ImageFormatMismatch = CL_IMAGE_FORMAT_MISMATCH,
+  ImageFormatNotSupported = CL_IMAGE_FORMAT_NOT_SUPPORTED,
+  BuildProgramFailure = CL_BUILD_PROGRAM_FAILURE,
+  MapFailure = CL_MAP_FAILURE,
+  MisalignedSubBufferOffset = CL_MISALIGNED_SUB_BUFFER_OFFSET,
+  ExecStatusErrorForEventsInWaitList = CL_EXEC_STATUS_ERROR_FOR_EVENTS_IN_WAIT_LIST,
 
-  ClInvalidValue = CL_INVALID_VALUE,
-  ClInvalidDeviceType = CL_INVALID_DEVICE_TYPE,
-  ClInvalidPlatform = CL_INVALID_PLATFORM,
-  ClInvalidDevice = CL_INVALID_DEVICE,
-  ClInvalidContext = CL_INVALID_CONTEXT,
-  ClInvalidQueueProperties = CL_INVALID_QUEUE_PROPERTIES,
-  ClInvalidCommandQueue = CL_INVALID_COMMAND_QUEUE,
-  ClInvalidHostPtr = CL_INVALID_HOST_PTR,
-  ClInvalidMemObject = CL_INVALID_MEM_OBJECT,
-  ClInvalidImageFormatDescriptor = CL_INVALID_IMAGE_FORMAT_DESCRIPTOR,
-  ClInvalidImageSize = CL_INVALID_IMAGE_SIZE,
-  ClInvalidSampler = CL_INVALID_SAMPLER,
-  ClInvalidBinary = CL_INVALID_BINARY,
-  ClInvalidBuildOptions = CL_INVALID_BUILD_OPTIONS,
-  ClInvalidProgram = CL_INVALID_PROGRAM,
-  ClInvalidProgramExecutable = CL_INVALID_PROGRAM_EXECUTABLE,
-  ClInvalidKernelName = CL_INVALID_KERNEL_NAME,
-  ClInvalidKernelDefinition = CL_INVALID_KERNEL_DEFINITION,
-  ClInvalidKernel = CL_INVALID_KERNEL,
-  ClInvalidArgIndex = CL_INVALID_ARG_INDEX,
-  ClInvalidArgValue = CL_INVALID_ARG_VALUE,
-  ClInvalidArgSize = CL_INVALID_ARG_SIZE,
-  ClInvalidKernelArgs = CL_INVALID_KERNEL_ARGS,
-  ClInvalidWorkDimension = CL_INVALID_WORK_DIMENSION,
-  ClInvalidWorkGroupSize = CL_INVALID_WORK_GROUP_SIZE,
-  ClInvalidWorkItemSize = CL_INVALID_WORK_ITEM_SIZE,
-  ClInvalidGlobalOffset = CL_INVALID_GLOBAL_OFFSET,
-  ClInvalidEventWaitList = CL_INVALID_EVENT_WAIT_LIST,
-  ClInvalidEvent = CL_INVALID_EVENT,
-  ClInvalidOperation = CL_INVALID_OPERATION,
-  ClInvalidGlObject = CL_INVALID_GL_OBJECT,
-  ClInvalidBufferSize = CL_INVALID_BUFFER_SIZE,
-  ClInvalidMipLevel = CL_INVALID_MIP_LEVEL,
-  ClInvalidGlobalWorkSize = CL_INVALID_GLOBAL_WORK_SIZE,
-  //  ClInvalidProperty = CL_INVALID_PROPERTY   // TODO Is this not supported by the NVIDIA implementation?
+  InvalidValue = CL_INVALID_VALUE,
+  InvalidDeviceType = CL_INVALID_DEVICE_TYPE,
+  InvalidPlatform = CL_INVALID_PLATFORM,
+  InvalidDevice = CL_INVALID_DEVICE,
+  InvalidContext = CL_INVALID_CONTEXT,
+  InvalidQueueProperties = CL_INVALID_QUEUE_PROPERTIES,
+  InvalidCommandQueue = CL_INVALID_COMMAND_QUEUE,
+  InvalidHostPtr = CL_INVALID_HOST_PTR,
+  InvalidMemObject = CL_INVALID_MEM_OBJECT,
+  InvalidImageFormatDescriptor = CL_INVALID_IMAGE_FORMAT_DESCRIPTOR,
+  InvalidImageSize = CL_INVALID_IMAGE_SIZE,
+  InvalidSampler = CL_INVALID_SAMPLER,
+  InvalidBinary = CL_INVALID_BINARY,
+  InvalidBuildOptions = CL_INVALID_BUILD_OPTIONS,
+  InvalidProgram = CL_INVALID_PROGRAM,
+  InvalidProgramExecutable = CL_INVALID_PROGRAM_EXECUTABLE,
+  InvalidKernelName = CL_INVALID_KERNEL_NAME,
+  InvalidKernelDefinition = CL_INVALID_KERNEL_DEFINITION,
+  InvalidKernel = CL_INVALID_KERNEL,
+  InvalidArgIndex = CL_INVALID_ARG_INDEX,
+  InvalidArgValue = CL_INVALID_ARG_VALUE,
+  InvalidArgSize = CL_INVALID_ARG_SIZE,
+  InvalidKernelArgs = CL_INVALID_KERNEL_ARGS,
+  InvalidWorkDimension = CL_INVALID_WORK_DIMENSION,
+  InvalidWorkGroupSize = CL_INVALID_WORK_GROUP_SIZE,
+  InvalidWorkItemSize = CL_INVALID_WORK_ITEM_SIZE,
+  InvalidGlobalOffset = CL_INVALID_GLOBAL_OFFSET,
+  InvalidEventWaitList = CL_INVALID_EVENT_WAIT_LIST,
+  InvalidEvent = CL_INVALID_EVENT,
+  InvalidOperation = CL_INVALID_OPERATION,
+  InvalidGlObject = CL_INVALID_GL_OBJECT,
+  InvalidBufferSize = CL_INVALID_BUFFER_SIZE,
+  InvalidMipLevel = CL_INVALID_MIP_LEVEL,
+  InvalidGlobalWorkSize = CL_INVALID_GLOBAL_WORK_SIZE,
+  InvalidProperty = CL_INVALID_PROPERTY   // TODO Is this not supported by the NVIDIA implementation?
 };
 
 /* OpenCL Version */
@@ -273,44 +273,44 @@ enum MemInfo {
 };
 
 /* cl_image_info */
-enum ClImageInfo {
-  ClImageFormat = CL_IMAGE_FORMAT,
-  ClImageElementSize = CL_IMAGE_ELEMENT_SIZE,
-  ClImageRowPitch = CL_IMAGE_ROW_PITCH,
-  ClImageSlicePitch = CL_IMAGE_SLICE_PITCH,
-  ClImageWidth = CL_IMAGE_WIDTH,
-  ClImageHeight = CL_IMAGE_HEIGHT,
-  ClImageDepth = CL_IMAGE_DEPTH
+enum ImageInfo {
+  ImageFormat = CL_IMAGE_FORMAT,
+  ImageElementSize = CL_IMAGE_ELEMENT_SIZE,
+  ImageRowPitch = CL_IMAGE_ROW_PITCH,
+  ImageSlicePitch = CL_IMAGE_SLICE_PITCH,
+  ImageWidth = CL_IMAGE_WIDTH,
+  ImageHeight = CL_IMAGE_HEIGHT,
+  ImageDepth = CL_IMAGE_DEPTH
 };
 
 /* cl_addressing_mode */
-enum ClAddressingMode {
-  ClAddressNone = CL_ADDRESS_NONE,
-  ClAddressClampToEdge = CL_ADDRESS_CLAMP_TO_EDGE,
-  ClAddressClamp = CL_ADDRESS_CLAMP,
-  ClAddressRepeat = CL_ADDRESS_REPEAT,
-  ClAddressMirroredRepeat = CL_ADDRESS_MIRRORED_REPEAT
+enum AddressingMode {
+  AddressNone = CL_ADDRESS_NONE,
+  AddressClampToEdge = CL_ADDRESS_CLAMP_TO_EDGE,
+  AddressClamp = CL_ADDRESS_CLAMP,
+  AddressRepeat = CL_ADDRESS_REPEAT,
+  AddressMirroredRepeat = CL_ADDRESS_MIRRORED_REPEAT
 };
 
 /* cl_filter_mode */
-enum ClFilterMode {
-  ClFilterNearest = CL_FILTER_NEAREST,
-  ClFilterLinear = CL_FILTER_LINEAR
+enum FilterMode {
+  FilterNearest = CL_FILTER_NEAREST,
+  FilterLinear = CL_FILTER_LINEAR
 };
 
 /* cl_sampler_info */
-enum ClSamplerInfo {
-  ClSamplerReferenceCount = CL_SAMPLER_REFERENCE_COUNT,
-  ClSamplerContext = CL_SAMPLER_CONTEXT,
-  ClSamplerNormalizedCoords = CL_SAMPLER_NORMALIZED_COORDS,
-  ClSamplerAddressingMode = CL_SAMPLER_ADDRESSING_MODE,
-  ClSamplerFilterMode = CL_SAMPLER_FILTER_MODE
+enum SamplerInfo {
+  SamplerReferenceCount = CL_SAMPLER_REFERENCE_COUNT,
+  SamplerContext = CL_SAMPLER_CONTEXT,
+  SamplerNormalizedCoords = CL_SAMPLER_NORMALIZED_COORDS,
+  SamplerAddressingMode = CL_SAMPLER_ADDRESSING_MODE,
+  SamplerFilterMode = CL_SAMPLER_FILTER_MODE
 };
 
 /* cl_map_flags */
-enum ClMapFlags {
-  ClMapRead = CL_MAP_READ,
-  ClMapWrite = CL_MAP_WRITE
+enum MapFlags {
+  MapRead = CL_MAP_READ,
+  MapWrite = CL_MAP_WRITE
 };
 
 /* cl_program_info */
@@ -332,11 +332,11 @@ enum ProgramBuildInfo {
 };
 
 /* cl_build_status */
-enum ClBuildStatus {
-  ClBuildSuccess = CL_BUILD_SUCCESS,
-  ClBuildNone = CL_BUILD_NONE,
-  ClBuildError = CL_BUILD_ERROR,
-  ClBuildInProgress = CL_BUILD_IN_PROGRESS
+enum BuildStatus {
+  BuildSuccess = CL_BUILD_SUCCESS,
+  BuildNone = CL_BUILD_NONE,
+  BuildError = CL_BUILD_ERROR,
+  BuildInProgress = CL_BUILD_IN_PROGRESS
 };
 
 /* cl_kernel_info */
@@ -392,22 +392,22 @@ enum CommandType {
 };
 
 /* command execution status */
-enum CommandExecStatus {
-  Complete = CL_COMPLETE,
-  Running = CL_RUNNING,
-  Submitted = CL_SUBMITTED,
-  Queued = CL_QUEUED
+enum ClCommandExecStatus {
+  ClComplete = CL_COMPLETE,
+  ClRunning = CL_RUNNING,
+  ClSubmitted = CL_SUBMITTED,
+  ClQueued = CL_QUEUED
 };
 
 /* cl_buffer_create_type */
-enum ClBufferCreateType {
-  ClBufferCreateTypeRegion = CL_BUFFER_CREATE_TYPE_REGION
+enum BufferCreateType {
+  BufferCreateTypeRegion = CL_BUFFER_CREATE_TYPE_REGION
 };
 
 /* cl_profiling_info */
-enum ClProfilingInfo {
-  ClProfilingCommandQueued = CL_PROFILING_COMMAND_QUEUED,
-  ClProfilingCommandSubmit = CL_PROFILING_COMMAND_SUBMIT,
-  ClProfilingCommandStart = CL_PROFILING_COMMAND_START,
-  ClProfilingCommandEnd = CL_PROFILING_COMMAND_END
+enum ProfilingInfo {
+  ProfilingCommandQueued = CL_PROFILING_COMMAND_QUEUED,
+  ProfilingCommandSubmit = CL_PROFILING_COMMAND_SUBMIT,
+  ProfilingCommandStart = CL_PROFILING_COMMAND_START,
+  ProfilingCommandEnd = CL_PROFILING_COMMAND_END
 };

@@ -4,42 +4,41 @@
 #include <cl_enums.h>
 
 module Foreign.OpenCL.Bindings.Error (
-    OpenCLException(..), ClError(..),
-    checkError, checkErrorA,
-    throwError, assert
+    ClException(..), ClError(..),
+    checkClError, checkClError_, throwError, assert
   )
 where
 
-{# import Foreign.OpenCL.Bindings.Types #}
+{# import Foreign.OpenCL.Bindings.Types #} (ClInt)
 
 import Control.Exception hiding (assert)
 import Data.Typeable
 
 {#enum ClError {} deriving (Show, Eq) #}
 
-data OpenCLException = OpenCLException ClError (Maybe String)
+data ClException = ClException ClError (Maybe String)
      deriving Typeable
 
-instance Exception OpenCLException
+instance Exception ClException
 
-instance Show OpenCLException where
-  show (OpenCLException error (Just loc)) =
+instance Show ClException where
+  show (ClException error (Just loc)) =
     "OpenCL Exception: " ++ show error ++ " occurred in call to: " ++ loc
-  show (OpenCLException error Nothing) =
+  show (ClException error Nothing) =
     "OpenCL Exception: " ++ show error
 
-checkError :: ClInt -> IO ()
-checkError errcode =
+-- ^ Check error an annotate it with a location
+checkClError :: String -> ClInt -> IO ClInt
+checkClError str errcode =
   case decodeError errcode of
-    ClSuccess -> return ()
-    error -> throwIO (OpenCLException error Nothing)
+    Success -> return errcode
+    error -> throwIO (ClException error (Just str))
+    
 
 -- ^ Check error an annotate it with a location
-checkErrorA :: String -> ClInt -> IO ()
-checkErrorA str errcode =
-  case decodeError errcode of
-    ClSuccess -> return ()
-    error -> throwIO (OpenCLException error (Just str))
+checkClError_ :: String -> ClInt -> IO ()
+checkClError_ str errcode = checkClError str errcode >> return ()
+
 
 
 decodeError :: ClInt -> ClError
@@ -47,7 +46,7 @@ decodeError = toEnum . fromIntegral
 
 -- TODO: Implement properly by extending data type
 throwError :: String -> IO ()
-throwError str = throwIO $ OpenCLException ClSuccess (Just str)
+throwError str = throwIO $ ClException Success (Just str)
 
 assert :: Bool -> String -> IO ()
 assert True _    = return ()

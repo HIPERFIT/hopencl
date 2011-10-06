@@ -4,14 +4,15 @@
 module Foreign.OpenCL.Bindings.Event (
    createUserEvent,
 
-   eventCommandQueue, eventContext, eventCommandType
+   eventCommandQueue, eventContext, eventCommandType,
+   
+   setEventCompleteCallback, setUserEventStatus, wrapCallback
   ) where
 
 import Control.Monad
 
 import Foreign
 import Foreign.C.Types
-import Foreign.Ptr
 
 {#import Foreign.OpenCL.Bindings.Types #}
 {#import Foreign.OpenCL.Bindings.Error #}
@@ -26,7 +27,7 @@ createUserEvent context =
   withForeignPtr context $ \ctx ->
   alloca $ \ep -> do
     event <- clCreateUserEvent_ ctx ep
-    checkErrorA "clCreateUserEvent" =<< peek ep
+    checkClError_ "clCreateUserEvent" =<< peek ep
     attachEventFinalizer event
 
 getEventInfo event info =
@@ -52,7 +53,7 @@ setEventCompleteCallback event user_data callbackfn =
     let ud_ptr = castPtr user_data_ptr :: Ptr ()
     cb_ptr <- wrapCallback callback
     err <- {# call clSetEventCallback #} event_ptr (fromIntegral $ fromEnum Complete) cb_ptr ud_ptr
-    checkErrorA "clSetEventCallback" err
+    checkClError_ "clSetEventCallback" err
       where
         -- We throw away the Event, as the event should be stored in the
         -- closure of the callback function if necessary
@@ -66,7 +67,7 @@ setUserEventStatus :: Event -> Int -> IO ()
 setUserEventStatus event execution_status =
   withForeignPtr event $ \event_ptr -> do
     err <- {# call unsafe clSetUserEventStatus #} event_ptr (fromIntegral execution_status)
-    checkErrorA "clSetUserEventStatus" err
+    checkClError_ "clSetUserEventStatus" err
   
 foreign import ccall "wrapper" wrapCallback :: 
                 (Ptr CEvent -> CInt -> Ptr () -> IO ())
@@ -77,6 +78,6 @@ foreign import ccall "wrapper" wrapCallback ::
 clCreateUserEvent_ = {#call unsafe clCreateUserEvent #}
 
 clGetEventInfo_ event name size value size_ret =
-  do errcode <- {#call unsafe clGetEventInfo #} event name size value size_ret
-     checkErrorA "clGetEventInfo" errcode
-     return errcode
+  checkClError "clGetEventInfo" =<<
+    {#call unsafe clGetEventInfo #} event name size value size_ret
+

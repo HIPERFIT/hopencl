@@ -1,4 +1,4 @@
- {-# LANGUAGE ForeignFunctionInterface, EmptyDataDecls #-}
+ {-# LANGUAGE EmptyDataDecls #-}
 
 #include <CL/cl.h>
 #include <cl_enums.h>
@@ -84,6 +84,7 @@ clFalse, clTrue :: ClUInt
 clFalse = fromIntegral $ fromEnum ClFalse
 clTrue = fromIntegral $ fromEnum ClTrue
 
+toOCLBool :: Bool -> ClUInt
 toOCLBool True = clTrue
 toOCLBool False = clFalse
 
@@ -92,11 +93,11 @@ toOCLBool False = clFalse
 {#enum PlatformInfo {} deriving (Show, Eq) #}
 
 -- Contexts
-data ContextProperties = ContextPlatform PlatformID
-                         deriving (Show,Eq)
-
 {#enum ClContextProperties {} deriving (Show, Eq) #}
 
+-- wrapper that contains the actual PlatformID
+data ContextProperties = ContextPlatform PlatformID
+                         deriving (Show,Eq)
 
 {#enum ContextInfo {} deriving (Show, Eq) #}
 
@@ -111,13 +112,35 @@ data ContextProperties = ContextPlatform PlatformID
 -- Command Queue
 {#enum CommandQueueInfo {} deriving (Show, Eq) #}
 {#enum CommandQueueProperties {} deriving (Show, Eq) #}
-{#enum CommandExecStatus {} deriving (Show, Eq) #}
+{#enum ClCommandExecStatus {} deriving (Show, Eq) #}
 
+-- wrapper that supports errornous states 
+-- See page 145 in the OpenCL specification, v1.1
+
+data CommandExecStatus = Complete
+                       | Running
+                       | Submitted
+                       | Queued
+                       | Error Int
+                       deriving (Show,Eq)
+instance Enum CommandExecStatus where
+  fromEnum Complete = fromEnum ClComplete
+  fromEnum Running = fromEnum ClRunning
+  fromEnum Submitted = fromEnum ClSubmitted
+  fromEnum Queued = fromEnum ClQueued
+  fromEnum (Error n) = n
+
+  toEnum 0 = Complete
+  toEnum 1 = Running
+  toEnum 2 = Submitted
+  toEnum 3 = Queued
+  toEnum n | n < 0 = Error n
+           | otherwise = error ("CommandExecStatus.toEnum: Cannot match " ++ show n)
 
 -- Program objects
 {#enum ProgramInfo {} deriving (Show, Eq) #}
 {#enum ProgramBuildInfo {} deriving (Show, Eq) #}
-{#enum ClBuildStatus {} deriving (Show, Eq) #}
+{#enum BuildStatus {} deriving (Show, Eq) #}
 
 -- Kernels
 {#enum KernelInfo {} deriving (Show, Eq) #}
@@ -127,7 +150,7 @@ data ContextProperties = ContextPlatform PlatformID
 {#enum MemFlags {} deriving (Show, Eq) #}
 {#enum MemObjectType {} deriving (Show, Eq) #}
 {#enum MemInfo {} deriving (Show, Eq) #}
-{#enum ClBufferCreateType {} deriving (Show, Eq) #}
+{#enum BufferCreateType {} deriving (Show, Eq) #}
 
 -- Events
 {#enum EventInfo {} deriving (Show, Eq) #}
@@ -136,14 +159,14 @@ data ContextProperties = ContextPlatform PlatformID
 -- Images
 {#enum ClChannelOrder {} deriving (Show, Eq) #}
 {#enum ClChannelType {} deriving (Show, Eq) #}
-{#enum ClImageInfo {} deriving (Show, Eq) #}
+{#enum ImageInfo {} deriving (Show, Eq) #}
 
 -- Sampler
-{#enum ClSamplerInfo {} deriving (Show, Eq) #}
-{#enum ClFilterMode {} deriving (Show, Eq) #}
-{#enum ClAddressingMode {} deriving (Show, Eq) #}
+{#enum SamplerInfo {} deriving (Show, Eq) #}
+{#enum FilterMode {} deriving (Show, Eq) #}
+{#enum AddressingMode {} deriving (Show, Eq) #}
 
 -- Other
-{#enum ClMapFlags {} deriving (Show, Eq) #}
-{#enum ClProfilingInfo {} deriving (Show, Eq) #}
+{#enum MapFlags {} deriving (Show, Eq) #}
+{#enum ProfilingInfo {} deriving (Show, Eq) #}
 

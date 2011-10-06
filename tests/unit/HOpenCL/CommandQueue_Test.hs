@@ -4,11 +4,9 @@ import Foreign.OpenCL.Bindings
 
 import Test.HUnit hiding (Test, test)
 import Test.Framework.Providers.HUnit (testCase)
-import Test.Framework (Test, testGroup, buildTest)
+import Test.Framework (testGroup, buildTest)
 
-import Control.Monad (forM_, forM, liftM)
-
-import Test_Util (oneOfM, void)
+import Control.Monad (forM_, forM)
 
 --------------------
 --   Test suite   --
@@ -20,9 +18,9 @@ tests = testGroup "Command Queue"
 
 testCommandQueueProps = buildTest $ do
   platforms <- getPlatformIDs
-  devices <- mapM (getDeviceIDs DeviceTypeAll) platforms
+  devices <- mapM (getDeviceIDs [DeviceTypeAll]) platforms
   let pds = zip (map ContextPlatform platforms) devices
-  cs <- forM pds $ \(p, ds) -> createContext ds [p]
+  cs <- forM pds $ \(p, ds) -> createContext ds [p] NoContextCallback
   let cds = [(c, d) | c <- cs, ds <- devices, d <- ds]
   let properties = [QueueProfilingEnable]
   queues <- forM cds $ \(c, d) -> createCommandQueue c d properties
@@ -41,13 +39,12 @@ testCommandQueueProps = buildTest $ do
 
 testCommandQueue = do
   platforms <- getPlatformIDs
-  devices <- mapM (getDeviceIDs DeviceTypeAll) platforms
+  devices <- mapM (getDeviceIDs [DeviceTypeAll]) platforms
   let pds = zip (map ContextPlatform platforms) devices
-  cs <- forM pds $ \(p, ds) -> createContext ds [p]
-  queues <- forM (zip cs devices) $ \(c, ds) ->
-              forM ds $ \d ->
-                createCommandQueue c d [QueueOutOfOrderExecModeEnable]
-  return ()
+  cs <- forM pds $ \(p, ds) -> createContext ds [p] NoContextCallback
+  forM_ (zip cs devices) $ \(c, ds) ->
+    forM ds $ \d ->
+      createCommandQueue c d [QueueOutOfOrderExecModeEnable]
 
 testQueueContext (queue, context) = do
   context' <- queueContext queue

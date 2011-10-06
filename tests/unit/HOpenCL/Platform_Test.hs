@@ -4,7 +4,7 @@ import Foreign.OpenCL.Bindings
 
 import Test.HUnit hiding (Test, test)
 import Test.Framework.Providers.HUnit (testCase)
-import Test.Framework (Test, testGroup, buildTest)
+import Test.Framework (testGroup, buildTest)
 
 import Control.Monad (forM_)
 
@@ -40,6 +40,6 @@ testPlatform = do
 -- The primary test here is that no error is thrown
 testPlatformVersion = void . platformVersion
 testPlatformName = void . platformName
-testPlatformProfile p = (platformProfile p) `oneOfM` ["FULL_PROFILE", "EMBEDDED_PROFILE"]
+testPlatformProfile p = platformProfile p `oneOfM` ["FULL_PROFILE", "EMBEDDED_PROFILE"]
 testPlatformVendor = void . platformVendor
 testPlatformExtensions = void . platformExtensions

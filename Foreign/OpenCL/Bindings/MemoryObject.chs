@@ -7,7 +7,12 @@ module Foreign.OpenCL.Bindings.MemoryObject (
    peekArray, peekListArray,
    pokeArray, pokeListArray,
    newListArray, newListArrayLen,
-   withListArray, withListArrayLen
+   withListArray, withListArrayLen,
+   
+   enqueueCopyBuffer,
+   
+   memobjType, memobjFlags, memobjSize, 
+   memobjHostPtr, memobjMapCount, memobjContext
    ) where
 
 import Control.Exception
@@ -35,9 +40,10 @@ createBuffer :: Context -> [MemFlags] -> Int -> Ptr a -> IO (MemObject a)
 createBuffer context flags n value_ptr =
   withForeignPtr context $ \ctx ->
   F.alloca $ \ep -> do
-    memobj <- clCreateBuffer ctx (enumToBitfield flags) (fromIntegral n)
-                             (castPtr value_ptr) ep
-    checkErrorA "clCreateBuffer" =<< peek ep
+    memobj <- {#call unsafe clCreateBuffer #}
+                  ctx (enumToBitfield flags) (fromIntegral n)
+                  (castPtr value_ptr) ep
+    checkClError_ "clCreateBuffer" =<< peek ep
     return $ MemObject memobj
 
 mallocArray :: Storable a => Context -> [MemFlags] -> Int -> IO (MemObject a)
@@ -51,8 +57,8 @@ allocaArray :: Storable a =>
 allocaArray context flags n = bracket (mallocArray context flags n) free
 
 free :: MemObject a -> IO ()
-free dp = do err <- clReleaseMemObject_ (memobjPtr dp)
-             checkErrorA "clReleaseMemObject" err
+free dp = do err <- {#call unsafe clReleaseMemObject #} (memobjPtr dp)
+             checkClError_ "clReleaseMemObject" err
 
 peekArray :: Storable a => CommandQueue -> Int -> Int -> MemObject a -> Ptr a -> IO ()
 peekArray queue offset n mobj ptr = doPeek undefined mobj >> return ()
@@ -106,6 +112,7 @@ withListArrayLen context xs f =
 -- with newListArrayLen)?
 --
 
+-- TODO implement copyArray using enqueueCopyBuffer
 
 
 enqueueReadBuffer :: CommandQueue -> (MemObject a) -> Bool
@@ -116,9 +123,10 @@ enqueueReadBuffer q memobj block offset cb ptr event_wait_list =
   withForeignPtrs event_wait_list $ \event_ptrs ->
   withArrayNullLen event_ptrs $ \n event_array -> do
   F.alloca $ \event -> do
-    err <- clEnqueueReadBuffer_ queue (memobjPtr memobj) (toOCLBool block) offset
-                                cb (castPtr ptr) (fromIntegral n) event_array event
-    checkErrorA "clEnqueueReadBuffer" err
+    checkClError_ "clEnqueueReadBuffer" =<< 
+      {#call unsafe clEnqueueReadBuffer #} 
+          queue (memobjPtr memobj) (toOCLBool block) offset
+          cb (castPtr ptr) (fromIntegral n) event_array event
     attachEventFinalizer =<< peek event
 
 enqueueWriteBuffer :: Storable a => CommandQueue -> (MemObject a) -> Bool
@@ -129,9 +137,10 @@ enqueueWriteBuffer q memobj block offset cb ptr event_wait_list =
   withForeignPtrs event_wait_list $ \event_ptrs ->
   withArrayNullLen event_ptrs $ \n event_array -> do
   F.alloca $ \event -> do
-    err <- clEnqueueWriteBuffer_ queue (memobjPtr memobj) (toOCLBool block) offset
-                                 cb (castPtr ptr) (fromIntegral n) event_array event
-    checkErrorA "clEnqueueWriteBuffer" err
+    checkClError_ "clEnqueueWriteBuffer" =<< 
+      {#call unsafe clEnqueueWriteBuffer #}
+          queue (memobjPtr memobj) (toOCLBool block) offset
+          cb (castPtr ptr) (fromIntegral n) event_array event
     attachEventFinalizer =<< peek event
 
 enqueueCopyBuffer :: CommandQueue -> (MemObject a) -> (MemObject a)
@@ -142,10 +151,11 @@ enqueueCopyBuffer q memobjSrc memobjDst offsetSrc offsetDst cb event_wait_list =
   withForeignPtrs event_wait_list $ \event_ptrs ->
   withArrayNullLen event_ptrs $ \n event_array -> do
   F.alloca $ \event -> do
-    err <- clEnqueueCopyBuffer_ queue (memobjPtr memobjSrc) (memobjPtr memobjDst)
-                                offsetSrc offsetDst
-                                cb (fromIntegral n) event_array event
-    checkErrorA "clEnqueueCopyBuffer" err
+    checkClError_ "clEnqueueCopyBuffer" =<< 
+      {#call unsafe clEnqueueCopyBuffer #}
+          queue (memobjPtr memobjSrc) (memobjPtr memobjDst)
+          offsetSrc offsetDst
+          cb (fromIntegral n) event_array event
     attachEventFinalizer =<< peek event
 
 memobjType :: MemObject a -> IO MemObjectType
@@ -171,18 +181,9 @@ memobjContext :: MemObject a -> IO Context
 memobjContext memobj = attachContextFinalizer =<< getMemObjectInfo memobj MemContext
 
 
-getMemObjectInfo memobj = getInfo $ clGetMemObjectInfo (memobjPtr memobj)
-
 -- C interfacing functions
-clCreateBuffer_ = {#call unsafe clCreateBuffer #}
-clReleaseMemObject_ = {#call unsafe clReleaseMemObject #}
-clEnqueueReadBuffer_ = {#call unsafe clEnqueueReadBuffer #}
-clEnqueueWriteBuffer_ = {#call unsafe clEnqueueWriteBuffer #}
-clEnqueueCopyBuffer_ = {#call unsafe clEnqueueCopyBuffer #}
-
-
-clGetMemObjectInfo_ memobj name size value size_ret =
-  do err <- {#call unsafe clGetMemObjectInfo #} memobj name size value size_ret
-     checkErrorA "clGetMemObjectInfo" err
-     return err
-
+getMemObjectInfo memobj = getInfo $ clGetMemObjectInfo_ (memobjPtr memobj)
+  where
+    clGetMemObjectInfo_ memobj name size value size_ret =
+      checkClError "clGetMemObjectInfo" =<< 
+        {#call unsafe clGetMemObjectInfo #} memobj name size value size_ret

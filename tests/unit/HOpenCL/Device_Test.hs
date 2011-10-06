@@ -4,7 +4,7 @@ import Foreign.OpenCL.Bindings
 
 import Test.HUnit hiding (Test, test)
 import Test.Framework.Providers.HUnit (testCase)
-import Test.Framework (Test, testGroup, buildTest)
+import Test.Framework (testGroup, buildTest)
 
 import Control.Monad (forM_, liftM)
 
@@ -20,7 +20,7 @@ tests = testGroup "Device"
 
 testDeviceProperties = buildTest $ do
   ps <- getPlatformIDs
-  ds <- liftM concat $ mapM (getDeviceIDs DeviceTypeAll) ps
+  ds <- liftM concat $ mapM (getDeviceIDs [DeviceTypeAll]) ps
   return $ testGroup "Device properties"
     [ testCase "deviceAddressBits"        $ forM_ ds testDeviceAddressBits
     , testCase "deviceAvailable"          $ forM_ ds testDeviceAvailable
@@ -80,8 +80,8 @@ testDeviceProperties = buildTest $ do
 -- Test that at least one device can be obtained for each platform
 testDevice = do
   platforms <- getPlatformIDs
-  devices <- mapM (getDeviceIDs DeviceTypeAll) platforms
-  forM_ devices $ \d -> length devices > 0 @? "Platform without device"
+  devices <- mapM (getDeviceIDs [DeviceTypeAll]) platforms
+  forM_ devices $ \d -> length d > 0 @? "Platform without device"
 
 -- In the following our primary concern is checking that no errors are
 -- thrown by the property accessors

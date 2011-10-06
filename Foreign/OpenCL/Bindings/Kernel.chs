@@ -13,13 +13,11 @@ module Foreign.OpenCL.Bindings.Kernel (
    KernelArg(..), setKernelArg, setKernelArgs
   ) where
 
-import Control.Applicative
 import Control.Monad
 
 import Foreign
 import Foreign.C.String
 import Foreign.C.Types
-import Foreign.Ptr
 
 {# import Foreign.OpenCL.Bindings.Types #}
 {# import Foreign.OpenCL.Bindings.Error #}
@@ -37,8 +35,8 @@ createKernel prog name =
    withForeignPtr prog $ \prog_ptr ->
    withCString name $ \cstr ->
    alloca $ \ep -> do
-      kernel <- clCreateKernel_ prog_ptr cstr ep
-      checkErrorA "clCreateKernel" =<< peek ep
+      kernel <- {# call unsafe clCreateKernel #} prog_ptr cstr ep
+      checkClError_ "clCreateKernel" =<< peek ep
       attachKernelFinalizer kernel
 
 enqueueNDRangeKernel :: CommandQueue -> Kernel -> [ClSize] -> [ClSize] -> [ClSize] -> [Event] -> IO Event
@@ -51,14 +49,15 @@ enqueueNDRangeKernel cq k globalWorkOffsets globalWorkSizes localWorkSizes waitE
     withForeignPtrs waitEvs $ \event_ptrs ->
     withArrayNullLen event_ptrs $ \n event_array ->
     alloca $ \eventPtr ->
-    do err <- clEnqueueNDRangeKernel_ queue kernel workDim
-                                      globalWorkOffsetPtr
-                                      globalWorkSizePtr
-                                      localWorkSizePtr
-                                      (fromIntegral n)
-                                      event_array
-                                      eventPtr
-       checkErrorA "clEnqueueNDRangeKernel" err
+    do checkClError_ "clEnqueueNDRangeKernel" =<< 
+         {# call unsafe clEnqueueNDRangeKernel #} 
+                   queue kernel workDim
+                   globalWorkOffsetPtr
+                   globalWorkSizePtr
+                   localWorkSizePtr
+                   (fromIntegral n)
+                   event_array
+                   eventPtr
        attachEventFinalizer =<< peek eventPtr
   where workDim = fromIntegral . maximum $ map length [globalWorkOffsets, globalWorkSizes, localWorkSizes]
 
@@ -72,13 +71,13 @@ setKernelArg :: Kernel -> Int -> KernelArg -> IO ()
 setKernelArg kernel n param =
   withForeignPtr kernel $ \k ->
   withPtr param $ \param_ptr -> do
-    err <- clSetKernelArg_ k (fromIntegral n) (size param) param_ptr
+    err <- {# call unsafe clSetKernelArg #} k (fromIntegral n) (size param) param_ptr
     case toEnum $ fromIntegral err of
-      ClInvalidArgSize -> error $ "ClInvalidArgSize occurred in call to: clSetKernelArg. Argument #"
-                                  ++ show n ++ " was set to size " ++ show (size param)
-      ClInvalidArgIndex -> error $ "ClInvalidArgIndex occurred in call to: clSetKernelArg, when setting argument #"
-                                  ++ show n
-      _ -> checkErrorA "clSetKernelArg" err
+      InvalidArgSize  -> error $ "ClInvalidArgSize occurred in call to: clSetKernelArg. Argument #"
+                                 ++ show n ++ " was set to size " ++ show (size param)
+      InvalidArgIndex -> error $ "ClInvalidArgIndex occurred in call to: clSetKernelArg, when setting argument #"
+                                 ++ show n
+      _ -> checkClError_ "clSetKernelArg" err
       where size (MObjArg mobj) = fromIntegral $ sizeOf (memobjPtr mobj)
             size (VArg v) = fromIntegral $ sizeOf v
             size (StructArg xs) = fromIntegral . sum $ map sizeOf xs
@@ -110,20 +109,13 @@ enqueueTask cq k waitEvs =
     withForeignPtrs waitEvs $ \event_ptrs ->
     withArrayNullLen event_ptrs $ \n event_array ->
     alloca $ \eventPtr ->
-    do err <- clEnqueueTask_ queue kernel
-                             (fromIntegral n)
-                             event_array
-                             eventPtr
-       checkErrorA "clEnqueueTask" err
+    do checkClError_ "clEnqueueTask" =<<
+         {# call unsafe clEnqueueTask #}
+                   queue kernel
+                   (fromIntegral n)
+                   event_array
+                   eventPtr
        attachEventFinalizer =<< peek eventPtr
-
-getKernelInfo kernel info =
-    withForeignPtr kernel $ \kernel_ptr ->
-    getInfo (clGetKernelInfo_ kernel_ptr) info
-
-getKernelWorkGroupInfo kernel device info =
-    withForeignPtr kernel $ \kernel_ptr ->
-    getInfo (clGetKernelWorkGroupInfo_ kernel_ptr device) info
 
 kernelContext :: Kernel -> IO Context
 kernelContext kernel = attachContextFinalizer =<< getKernelInfo kernel KernelContext
@@ -151,18 +143,19 @@ kernelPrivateMemSize kernel device =
   getKernelWorkGroupInfo kernel device KernelPrivateMemSize
 
 -- C interfacing functions
-clCreateKernel_ = {#call unsafe clCreateKernel #}
-clSetKernelArg_ = {#call unsafe clSetKernelArg #}
+getKernelInfo kernel info =
+    withForeignPtr kernel $ \kernel_ptr ->
+    getInfo (clGetKernelInfo_ kernel_ptr) info
+  where
+    clGetKernelInfo_ kernel name size value size_ret =
+      checkClError "clGetKernelInfo" =<<
+        {#call unsafe clGetKernelInfo #} kernel name size value size_ret
 
-clEnqueueNDRangeKernel_ = {#call unsafe clEnqueueNDRangeKernel #}
-clEnqueueTask_ = {#call unsafe clEnqueueTask #}
+getKernelWorkGroupInfo kernel device info =
+    withForeignPtr kernel $ \kernel_ptr ->
+    getInfo (clGetKernelWorkGroupInfo_ kernel_ptr device) info
+  where
+    clGetKernelWorkGroupInfo_ kernel device name size value size_ret =
+      checkClError "clGetKernelWorkGroupInfo" =<< 
+        {#call unsafe clGetKernelWorkGroupInfo #} kernel device name size value size_ret
 
-clGetKernelInfo_ kernel name size value size_ret =
-  do errcode <- {#call unsafe clGetKernelInfo #} kernel name size value size_ret
-     checkErrorA "clGetKernelInfo" errcode
-     return errcode
-
-clGetKernelWorkGroupInfo_ kernel device name size value size_ret =
-  do errcode <- {#call unsafe clGetKernelWorkGroupInfo #} kernel device name size value size_ret
-     checkErrorA "clGetKernelWorkGroupInfo" errcode
-     return errcode

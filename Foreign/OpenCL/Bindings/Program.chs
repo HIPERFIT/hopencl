@@ -3,7 +3,7 @@
 
 module Foreign.OpenCL.Bindings.Program (
    createProgram, createProgramWithBinary,
-   buildProgram,
+   buildProgram, unloadCompiler,
    programContext, programDevices, programSource, programBinaries
   ) where
 
@@ -13,9 +13,7 @@ import Control.Monad
 import Foreign hiding (withMany)
 import Foreign.C.Types
 import Foreign.C.String
-import Foreign.Ptr
 
-import Data.Binary
 import qualified Data.ByteString as B
 
 {# import Foreign.OpenCL.Bindings.Types #}
@@ -34,8 +32,8 @@ createProgram ctx str =
    with cstr $ \cstr_ptr -> -- clCreateProgramWithSource expects a list of strings
    with (fromIntegral len) $ \len_ptr -> -- and a list of their lengths
    alloca $ \ep -> do
-      prog <- clCreateProgramWithSource_ ctx_ptr 1 cstr_ptr len_ptr ep
-      checkErrorA "clCreateProgramWithSource" =<< peek ep
+      prog <- {#call unsafe clCreateProgramWithSource #} ctx_ptr 1 cstr_ptr len_ptr ep
+      checkClError_ "clCreateProgramWithSource" =<< peek ep
       attachProgramFinalizer prog
 
 -- | Create a program from the ByteStrings obtained from
@@ -55,26 +53,22 @@ createProgramWithBinary ctx devs_and_bins =
       withArrays words $ \bin_arr_list ->
       withArray bin_arr_list $ \bin_arr ->
       withArray lengths $ \length_arr -> do
-        prog <- clCreateProgramWithBinary_ ctx_ptr (fromIntegral n) dev_arr length_arr
-                                           bin_arr binary_status ep
-        checkErrorA "createProgramWithBinary" =<< peek ep
-        mapM_ (checkErrorA "createProgramWithBinary -") =<< peekArray n binary_status
+        prog <- {#call unsafe clCreateProgramWithBinary #} 
+                    ctx_ptr (fromIntegral n) dev_arr length_arr
+                    bin_arr binary_status ep
+        checkClError_ "createProgramWithBinary" =<< peek ep
+        mapM_ (checkClError "createProgramWithBinary -") =<< peekArray n binary_status
         attachProgramFinalizer prog
-
--- unsafeWithInternals :: B.ByteString -> (Ptr Word8 -> Int -> IO a) -> IO a
--- unsafeWithInternals ps f
---  = case BI.toForeignPtr ps of
---    (fp,s,l) -> withForeignPtr fp $ \p -> f (p `plusPtr` s) l
-
 
 buildProgram :: Program -> [DeviceID] -> String -> IO ()
 buildProgram p devs opts =
   withForeignPtr p $ \prog ->
   withArrayLen devs $ \n dev_ptr ->
   withCString opts $ \opt_ptr -> do
-   err <- clBuildProgram_ prog (fromIntegral n)
-                          dev_ptr opt_ptr nullFunPtr nullPtr
-   if (toEnum (fromIntegral err) /= ClSuccess)
+   err <- {#call unsafe clBuildProgram #}
+              prog (fromIntegral n)
+              dev_ptr opt_ptr nullFunPtr nullPtr
+   if (toEnum (fromIntegral err) /= Success)
      then do
        log <- sequence $ getBuildInfo p <$> devs <*> [ProgramBuildLog]
        params <- sequence $ getBuildInfo p <$> devs <*> [ProgramBuildOptions]
@@ -85,15 +79,10 @@ buildProgram p devs opts =
        mapM_ putStrLn (log :: [String])
        putStrLn "*******************************************************************"
      else return ()
-   checkErrorA "clBuildProgram" err
+   checkClError_ "clBuildProgram" err
 
-getProgramInfo program info =
-    withForeignPtr program $ \program_ptr ->
-    getInfo (clGetProgramInfo_ program_ptr) info
-
-getBuildInfo program dev info =
-    withForeignPtr program $ \program_ptr ->
-    getInfo (clGetProgramBuildInfo_ program_ptr dev) info
+unloadCompiler :: IO ()
+unloadCompiler = checkClError_ "clUnloadCompiler" =<< {#call unsafe clUnloadCompiler #}
 
 programContext :: Program -> IO Context
 programContext prog = attachContextFinalizer =<< getProgramInfo prog ProgramContext
@@ -115,29 +104,29 @@ programBinaries prog =
       withArrayLen ptrs $ \n ptrs_array -> do
         let info_code = fromIntegral $ fromEnum ProgramBinaries
             bytes = fromIntegral $ n * sizeOf (head ptrs)
-        err <- clGetProgramInfo_ program_ptr info_code bytes
-                                 (castPtr ptrs_array) nullPtr
-        checkErrorA "programBinaries" err
+        checkClError_ "programBinaries" =<< 
+          clGetProgramInfo_ program_ptr info_code bytes
+                            (castPtr ptrs_array) nullPtr
         bin_ptrs <- peekArray n ptrs_array
         binaries <- foldM readBinary [] $ zip sizes bin_ptrs
         return $ zip devices binaries
   where
     readBinary :: [B.ByteString] -> (ClSize, Ptr Word8) -> IO [B.ByteString]
-    readBinary bs (0, ptr) = return bs
+    readBinary bs (0, _) = return bs
     readBinary bs (size, ptr) = do
       str <- B.pack <$> peekArray (fromIntegral size) ptr
       return $ str : bs
 
 -- C interfacing functions
-clCreateProgramWithSource_ = {#call unsafe clCreateProgramWithSource #}
-
-clBuildProgram_ = {#call unsafe clBuildProgram #}
-
-clGetProgramBuildInfo_ = {#call unsafe clGetProgramBuildInfo #}
-
-clCreateProgramWithBinary_ = {#call unsafe clCreateProgramWithBinary #}
-
+getProgramInfo program info =
+    withForeignPtr program $ \program_ptr ->
+    getInfo (clGetProgramInfo_ program_ptr) info
+      
 clGetProgramInfo_ program name size value size_ret =
-  do errcode <- {#call unsafe clGetProgramInfo #} program name size value size_ret
-     checkErrorA "clGetProgramInfo" errcode
-     return errcode
+  checkClError "clGetProgramInfo" =<< 
+    {#call unsafe clGetProgramInfo #} program name size value size_ret
+
+getBuildInfo program dev info =
+    withForeignPtr program $ \program_ptr ->
+    getInfo ({#call unsafe clGetProgramBuildInfo #} program_ptr dev) info
+

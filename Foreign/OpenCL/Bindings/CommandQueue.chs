@@ -5,9 +5,10 @@ module Foreign.OpenCL.Bindings.CommandQueue (
    createCommandQueue, queueContext, queueDevice, queueProperties
   ) where
 
+import Control.Applicative
+
 import Foreign
 import Foreign.C.Types
-import Foreign.Ptr
 
 {#import Foreign.OpenCL.Bindings.Types #}
 {#import Foreign.OpenCL.Bindings.Error #}
@@ -25,7 +26,7 @@ createCommandQueue ctx dev props =
    withForeignPtr ctx $ \ctx_ptr ->
    alloca $ \ep -> do
       ctx <- clCreateCommandQueue_ ctx_ptr dev (enumToBitfield props) ep
-      checkErrorA "clCreateCommandQueue" =<< peek ep
+      checkClError_ "clCreateCommandQueue" =<< peek ep
       attachCommandQueueFinalizer ctx
 
 getCommandQueueInfo queue info =
@@ -39,15 +40,16 @@ queueDevice :: CommandQueue -> IO DeviceID
 queueDevice queue = getCommandQueueInfo queue QueueDevice
 
 queueProperties :: CommandQueue -> IO [CommandQueueProperties]
-queueProperties queue = do
-   props <- (getCommandQueueInfo queue QueueProperties)
-   return . filter ((/=0) . (.&.) props . fromEnum)
-      $ [QueueOutOfOrderExecModeEnable, QueueProfilingEnable]
+queueProperties queue =
+   enumFromBitfield queue_props <$> (getCommandQueueInfo queue QueueProperties :: IO CInt)
+ where
+   queue_props = [QueueOutOfOrderExecModeEnable,
+                  QueueProfilingEnable]
 
 -- C interfacing functions
 clCreateCommandQueue_ = {#call unsafe clCreateCommandQueue #}
 
 clGetCommandQueueInfo_ queue name size value size_ret =
-  do errcode <- {#call unsafe clGetCommandQueueInfo #} queue name size value size_ret
-     checkErrorA "clGetCommandQueueInfo" errcode
-     return errcode
+  checkClError "clGetCommandQueueInfo" =<< 
+    {#call unsafe clGetCommandQueueInfo #} queue name size value size_ret
+

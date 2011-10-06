@@ -30,45 +30,38 @@ module Foreign.OpenCL.Bindings.Device (
    deviceType, deviceVendor, deviceVendorID, deviceVersion, deviceDriverVersion
  ) where
 
-import Data.Bits
+import Control.Monad
+import Control.Applicative
+
 import Data.Word
 
 import Foreign.C.Types
 import Foreign.Ptr
-import Foreign.ForeignPtr
+import Foreign.Storable
+import Foreign.Marshal
 
 {# import Foreign.OpenCL.Bindings.Types #}
 {# import Foreign.OpenCL.Bindings.Error #}
-
 import Foreign.OpenCL.Bindings.Util
 
-import Foreign.Storable
-import Foreign.Marshal
-import Control.Monad
-
--- TODO shouldn't the first argument be a list of device types?
 -- ^Obtain a list of available platforms.
-getDeviceIDs ::  DeviceType -> PlatformID -> IO [DeviceID]
+getDeviceIDs ::  [DeviceType] -> PlatformID -> IO [DeviceID]
 getDeviceIDs typ platform =
-  getList (clGetDeviceIDs_ platform typ)
-
+  getList (clGetDeviceIDs_ platform (enumToBitfield typ))
+ where
+  clGetDeviceIDs_ platform device_type num_entries devices num_devices =
+    checkClError "clGetDeviceIDs" =<< 
+      {#call unsafe clGetDeviceIDs #} platform device_type num_entries devices num_devices
+   
 getDeviceInfo device info =
     getInfo (clGetDeviceInfo_ device) info
 
--- Interfacing functions that performs error checking
-clGetDeviceIDs_ platform device_type num_entries devices num_devices =
-  do errcode <- {#call unsafe clGetDeviceIDs #} platform typ_code num_entries devices num_devices
-     checkErrorA "clGetDeviceIDs" errcode
-     return errcode
-    where typ_code = fromIntegral (fromEnum device_type)
-
 clGetDeviceInfo_ device name size value size_ret =
-  do errcode <- {#call unsafe clGetDeviceInfo #} device name size value size_ret
-     checkErrorA "clGetDeviceInfo" errcode
-     return errcode
-
+  checkClError "clGetDeviceInfo" =<< 
+    {#call unsafe clGetDeviceInfo #} device name size value size_ret
 
 ------- Below are the device info query functions --------
+
 -- |The compute device address space size in bits.
 deviceAddressBits :: DeviceID -> IO Word32
 deviceAddressBits dev = fromIntegral `fmap` (getDeviceInfo dev DeviceAddressBits :: IO ClUInt)
@@ -93,10 +86,11 @@ deviceErrorCorrectionSupport dev = getDeviceInfo dev DeviceErrorCorrectionSuppor
 
 -- |The execution capabilities of the device
 deviceExecutionCapabilities :: DeviceID -> IO [DeviceExecCapabilities]
-deviceExecutionCapabilities dev = do
-   cap <- (getDeviceInfo dev DeviceExecutionCapabilities :: IO {#type cl_device_exec_capabilities #})
-   return . filter (\x -> cap .&. (fromIntegral $ fromEnum x) /= 0)
-      $ [ExecKernel, ExecNativeKernel]
+deviceExecutionCapabilities dev =
+   enumFromBitfield caps <$>
+     (getDeviceInfo dev DeviceExecutionCapabilities :: IO {#type cl_device_exec_capabilities #})
+ where
+   caps = [ExecKernel, ExecNativeKernel]
 
 -- |The extensions supported by the device
 deviceExtensions :: DeviceID -> IO [String]
@@ -199,8 +193,8 @@ deviceMaxWorkItemSizes dev = do
    let array_size = fromIntegral $ dim * (fromIntegral $ sizeOf (undefined :: CSize))
    alloca $ \psize ->
      allocaArray dim $ \arr -> do
-       clGetDeviceInfo_ dev (fromIntegral $ fromEnum DeviceMaxWorkItemSizes)
-                        array_size (castPtr arr) psize
+       _ <- clGetDeviceInfo_ dev (fromIntegral $ fromEnum DeviceMaxWorkItemSizes)
+                             array_size (castPtr arr) psize
        size' <- peek psize
        when (array_size /= size') $ error "Size mismatch in element size array"
        mapM (peekElemOff arr) [0 .. dim - 1]
@@ -256,18 +250,20 @@ deviceProfilingTimerResolution dev = getDeviceInfo dev DeviceProfilingTimerResol
 
 -- |The command queue properties supported by the device
 deviceQueueProperties :: DeviceID -> IO [CommandQueueProperties]
-deviceQueueProperties dev = do
-   cap <- (getDeviceInfo dev DeviceQueueProperties :: IO {#type cl_command_queue_properties #})
-   return . filter (\x -> cap .&. (fromIntegral $ fromEnum x) /= 0)
-      $ [QueueOutOfOrderExecModeEnable,
-         QueueProfilingEnable]
+deviceQueueProperties dev =
+   enumFromBitfield queue_props <$> 
+     (getDeviceInfo dev DeviceQueueProperties :: IO {#type cl_command_queue_properties #})
+ where
+   queue_props = [QueueOutOfOrderExecModeEnable,
+                  QueueProfilingEnable]
 
 -- |Describe the single precision floating point capability of the device
 deviceSingleFPConfig :: DeviceID -> IO [DeviceFPConfig]
-deviceSingleFPConfig dev = do
-   cap <- (getDeviceInfo dev DeviceSingleFPConfig :: IO {#type cl_device_fp_config #})
-   return . filter (\x -> cap .&. (fromIntegral $ fromEnum x) /= 0)
-      $ [FpDenorm,
+deviceSingleFPConfig dev =
+   enumFromBitfield fps <$> 
+     (getDeviceInfo dev DeviceSingleFPConfig :: IO {#type cl_device_fp_config #})
+ where
+  fps = [FpDenorm,
          FpInfNan,
          FpRoundToNearest,
          FpRoundToZero,
@@ -277,14 +273,15 @@ deviceSingleFPConfig dev = do
 
 -- |Describe the type of the device
 deviceType :: DeviceID -> IO [DeviceType]
-deviceType dev = do
-   cap <- (getDeviceInfo dev DeviceType :: IO {#type cl_device_type #})
-   return . filter (\x -> cap .&. (fromIntegral $ fromEnum x) /= 0)
-      $ [DeviceTypeDefault,
-         DeviceTypeCpu,
-         DeviceTypeGpu,
-         DeviceTypeAccelerator,
-         DeviceTypeAll]
+deviceType dev =
+  enumFromBitfield device_types <$>
+    (getDeviceInfo dev DeviceType :: IO {#type cl_device_type #})
+ where
+   device_types = [DeviceTypeDefault,
+                   DeviceTypeCpu,
+                   DeviceTypeGpu,
+                   DeviceTypeAccelerator,
+                   DeviceTypeAll]
 
 -- |Obtain the device vendor name
 deviceVendor :: DeviceID -> IO String

@@ -4,7 +4,6 @@
 module Foreign.OpenCL.Bindings.Util where
 
 import Foreign
-import Foreign.C.Types
 import Foreign.C.String
 
 import Foreign.OpenCL.Bindings.Types
@@ -43,11 +42,11 @@ instance forall a. Storable a => ClGetInfo [a] where
     let info_code = fromIntegral $ fromEnum i
     in alloca $ \sp -> do
       -- Figure out how large the list is in bytes
-      getInfoFun info_code 0 nullPtr sp
+      _ <- getInfoFun info_code 0 nullPtr sp
       size <- peek sp
       -- Get the elements
       allocaArray (fromIntegral size) $ \ptrs -> do
-        getInfoFun info_code size (castPtr ptrs) sp
+        _ <- getInfoFun info_code size (castPtr ptrs) sp
         size' <- peek sp
         assert (size == size') "Inconsistent number of retrieved elements"
         let n = fromIntegral size `div` (sizeOf (undefined :: a))
@@ -61,11 +60,11 @@ class ClGetList a where
 instance Storable a => ClGetList a where
   getList getListFun = alloca $ \num -> do
    -- Figure out how large the list is
-   getListFun 0 nullPtr num
+   _ <- getListFun 0 nullPtr num
    n <- peek num
    -- Get the elements
    allocaArray (fromIntegral n) $ \ptrs -> do
-     getListFun n (castPtr ptrs) num
+     _ <- getListFun n (castPtr ptrs) num
      n' <- peek num
      assert (n == n') "Inconsistent number of retrieved elements"
      peekArray (fromIntegral n') ptrs
@@ -87,17 +86,21 @@ genericGetInfo info getInfoFun handler =
   let info_code = fromIntegral $ fromEnum info
   in alloca $ \bytes_ret -> do
        -- Determine the size of info
-       getInfoFun info_code 0 nullPtr bytes_ret
+       _ <- getInfoFun info_code 0 nullPtr bytes_ret
        bytes <- peek bytes_ret
        -- Get the info
        allocaBytes (fromIntegral bytes) $ \info_ptr -> do
-         getInfoFun info_code bytes info_ptr bytes_ret
+         _ <- getInfoFun info_code bytes info_ptr bytes_ret
          bytes' <- peek bytes_ret
          assert (bytes == bytes') "Inconsistent number of retrived bytes"
          handler bytes' info_ptr
 
 enumToBitfield :: (Bits a, Integral a, Enum b) => [b] -> a
 enumToBitfield = foldr ((.|.) . fromIntegral . fromEnum) 0
+
+enumFromBitfield :: (Integral b, Enum a) => [a] -> b -> [a]
+enumFromBitfield enum_list bits = filter (\x -> fromIntegral bits .&. fromEnum x /= 0) enum_list
+
 
 -- | Look at a list of foreign pointers, ensuring the pointers are not
 -- freed for at least the duration of the computation.

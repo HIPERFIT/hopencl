@@ -4,11 +4,9 @@ import Foreign.OpenCL.Bindings
 
 import Test.HUnit hiding (Test, test)
 import Test.Framework.Providers.HUnit (testCase)
-import Test.Framework (Test, testGroup, buildTest)
+import Test.Framework (testGroup, buildTest)
 
-import Control.Monad (forM_, forM, liftM, when)
-
-import Test_Util (oneOfM, void)
+import Control.Monad (forM_, forM)
 
 --------------------
 --   Test suite   --
@@ -27,13 +25,13 @@ kernel = "__kernel void vectorAdd(__global const float * a,"
 
 testProgramProps = buildTest $ do
   platforms <- getPlatformIDs
-  devices <- mapM (getDeviceIDs DeviceTypeAll) platforms
+  devices <- mapM (getDeviceIDs [DeviceTypeAll]) platforms
   let pds = zip (map ContextPlatform platforms) devices
-  cs <- forM pds $ \(p, ds) -> createContext ds [p]
+  cs <- forM pds $ \(p, ds) -> createContext ds [p] NoContextCallback
   programs <- forM cs (flip createProgram kernel)
   let progdevs = [(p,ds) | p <- programs, ds <- devices]
   let build_opts = ""
-  mapM_ ($build_opts) (map (uncurry buildProgram) progdevs)
+  mapM_ (($build_opts) . uncurry buildProgram) progdevs
   return $ testGroup "Program properties"
      [ testCase "programDevice"  $ forM_ (zip programs devices) testProgramDevices
      , testCase "programContext" $ forM_ (zip programs cs) testProgramContext
@@ -46,21 +44,20 @@ testProgramProps = buildTest $ do
 
 testProgram = do
   platforms <- getPlatformIDs
-  devices <- mapM (getDeviceIDs DeviceTypeAll) platforms
+  devices <- mapM (getDeviceIDs [DeviceTypeAll]) platforms
   let pds = zip (map ContextPlatform platforms) devices
-  cs <- forM pds $ \(p, ds) -> createContext ds [p]
-  programs <- forM cs (flip createProgram kernel)
-  return ()
+  cs <- forM pds $ \(p, ds) -> createContext ds [p] NoContextCallback
+  forM_ cs (`createProgram` kernel)
 
 testBuildProgram = do
   platforms <- getPlatformIDs
-  devices <- mapM (getDeviceIDs DeviceTypeAll) platforms
+  devices <- mapM (getDeviceIDs [DeviceTypeAll]) platforms
   let pds = zip (map ContextPlatform platforms) devices
-  cs <- forM pds $ \(p, ds) -> createContext ds [p]
-  programs <- forM cs (flip createProgram kernel)
+  cs <- forM pds $ \(p, ds) -> createContext ds [p] NoContextCallback
+  programs <- forM cs (`createProgram` kernel)
   let progdevs = [(p,ds) | p <- programs, ds <- devices]
   let build_opts = ""
-  mapM_ ($build_opts) (map (uncurry buildProgram) progdevs)
+  mapM_ (($build_opts) . uncurry buildProgram) progdevs
   return ()
 
 testProgramDevices (program, devices) = do

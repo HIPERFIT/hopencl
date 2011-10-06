@@ -10,7 +10,6 @@ module Foreign.OpenCL.Bindings.Finalizers (
 )
 where
 
-import Foreign.C.Types
 import Foreign.Ptr
 import Foreign.ForeignPtr
 

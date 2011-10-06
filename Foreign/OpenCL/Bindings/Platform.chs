@@ -35,16 +35,16 @@ platformVendor = getPlatformInfo PlatformVendor
 platformExtensions :: PlatformID -> IO String
 platformExtensions = getPlatformInfo PlatformExtensions
 
-getPlatformInfo info platform =
-   getInfo (clGetPlatformInfo_ platform) info
 
 -- Interfacing functions that performs error checking
+getPlatformInfo info platform =
+  getInfo (clGetPlatformInfo_ platform) info
+
 clGetPlatformIDs_ num_entries platforms num_platforms = do
-     errcode <- {#call unsafe clGetPlatformIDs #} num_entries platforms num_platforms
-     checkErrorA "clGetPlatformIDs" errcode
-     return errcode
+  checkClError "clGetPlatformIDs" =<< 
+    {#call unsafe clGetPlatformIDs #} num_entries platforms num_platforms
 
 clGetPlatformInfo_ platform name size value size_ret = do
-     errcode <- {#call unsafe clGetPlatformInfo #} platform name size value size_ret
-     checkErrorA "clGetPlatformInfo" errcode
-     return errcode
+  checkClError "clGetPlatformInfo" =<<
+    {#call unsafe clGetPlatformInfo #} platform name size value size_ret
+

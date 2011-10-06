@@ -4,11 +4,9 @@ import Foreign.OpenCL.Bindings
 
 import Test.HUnit hiding (Test, test)
 import Test.Framework.Providers.HUnit (testCase)
-import Test.Framework (Test, testGroup, buildTest)
+import Test.Framework (testGroup, buildTest)
 
-import Control.Monad (forM_, forM, liftM)
-
-import Test_Util (oneOfM, void)
+import Control.Monad (forM_, forM)
 
 --------------------
 --   Test suite   --
@@ -20,9 +18,9 @@ tests = testGroup "Context"
 
 testContextProps = buildTest $ do
   platforms <- getPlatformIDs
-  devices <- mapM (getDeviceIDs DeviceTypeAll) platforms
+  devices <- mapM (getDeviceIDs [DeviceTypeAll]) platforms
   let pds = zip (map ContextPlatform platforms) devices
-  cs <- forM pds $ \(p, ds) -> createContext ds [p]
+  cs <- forM pds $ \(p, ds) -> createContext ds [p] NoContextCallback
   return $ testGroup "Context properties"
      [ testCase "contextDevices"    $ forM_ (zip cs devices) testContextDevices
      , testCase "contextProperties" $ forM_ (zip cs platforms) testContextProperties
@@ -34,11 +32,9 @@ testContextProps = buildTest $ do
 
 testContext = do
   platforms <- getPlatformIDs
-  devices <- mapM (getDeviceIDs DeviceTypeAll) platforms
+  devices <- mapM (getDeviceIDs [DeviceTypeAll]) platforms
   let pds = zip (map ContextPlatform platforms) devices
-  cs <- forM pds $ \(p, ds) -> createContext ds [p]
-  return ()
-
+  forM_ pds $ \(p, ds) -> createContext ds [p] NoContextCallback
 
 testContextDevices (cs, devices) = do
   devices' <- contextDevices cs
