@@ -3,4 +3,5 @@ dist/
 *tix
 examples/*/*.o
 examples/*/*.hi
-examples/test/test
+examples/VectorAdd/VectorAdd
+examples/PlatformInfo/PlatformInfo
