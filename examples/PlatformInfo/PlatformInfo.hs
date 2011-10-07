@@ -15,6 +15,7 @@ platformInfoFn = [
   platformProfile,
   platformExtensions]
 
+main :: IO ()
 main = do
   ps <- getPlatformIDs
   putStrLn $ (show $ length ps) ++ " platform(s) found:"
@@ -24,10 +25,9 @@ main = do
   putStrLn ""
   devices <- liftM concat $ mapM (getDeviceIDs [DeviceTypeAll]) ps
   putStrLn $ (show $ length devices) ++ " devices(s) found:"
-  forM devices $ \dev -> do
+  forM_ devices $ \dev -> do
     putStrLn ""
     mapM (printDevice dev) devinfo
-
 
 -- Device info functions
 data DevInfo = forall a. Show a => DI String (DeviceID -> IO a)
