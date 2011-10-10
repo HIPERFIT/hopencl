@@ -1,10 +1,5 @@
-import Control.Monad
 import Control.Applicative
-
 import Foreign.OpenCL.Bindings
-import Foreign.Storable
-
-import qualified Data.ByteString as B
 
 n :: Int
 n = 100
@@ -13,6 +8,7 @@ list0, list1 :: [Float]
 list0 = [1..fromIntegral n]
 list1 = reverse list0
 
+main :: IO ()
 main = do
   -- Set up OpenCL context
   platform <- head <$> getPlatformIDs
@@ -34,7 +30,7 @@ main = do
   
   -- Enqueue kernel
   setKernelArgs kernel [MObjArg array0, MObjArg array1, MObjArg out]
-  enqueueNDRangeKernel queue kernel [] [fromIntegral n] [] []
+  _ <- enqueueNDRangeKernel queue kernel [] [fromIntegral n] [] []
   
   -- Read result
   print =<< peekListArray queue n out
