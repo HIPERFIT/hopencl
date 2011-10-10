@@ -57,12 +57,12 @@ createProgramWithBinary :: Context -- ^The context to associate the program with
 createProgramWithBinary ctx devs_and_bins =
    let (devices, binaries) = unzip devs_and_bins
        lengths = map (fromIntegral . B.length) binaries
-       words = map (map fromIntegral . B.unpack) binaries
+       words' = map (map fromIntegral . B.unpack) binaries
    in withForeignPtr ctx $ \ctx_ptr ->
       withArrayLen devices $ \n dev_arr ->
       allocaArray n $ \binary_status ->
       alloca $ \ep ->
-      withArrays words $ \bin_arr_list ->
+      withArrays words' $ \bin_arr_list ->
       withArray bin_arr_list $ \bin_arr ->
       withArray lengths $ \length_arr -> do
         prog <- {#call unsafe clCreateProgramWithBinary #} 
@@ -88,13 +88,13 @@ buildProgram p devs opts =
               dev_ptr opt_ptr nullFunPtr nullPtr
    if (toEnum (fromIntegral err) /= Success)
      then do
-       log <- sequence $ getBuildInfo p <$> devs <*> [ProgramBuildLog]
+       buildlog <- sequence $ getBuildInfo p <$> devs <*> [ProgramBuildLog]
        params <- sequence $ getBuildInfo p <$> devs <*> [ProgramBuildOptions]
        putStrLn "*************************** BUILD ERROR ***************************"
        putStrLn "Build failed when compiled with the following build options:"
        mapM_ putStrLn (params :: [String])
        putStrLn "\n***************************  BUILD LOG  ***************************"
-       mapM_ putStrLn (log :: [String])
+       mapM_ putStrLn (buildlog :: [String])
        putStrLn "*******************************************************************"
      else return ()
    checkClError_ "clBuildProgram" err

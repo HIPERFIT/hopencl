@@ -97,7 +97,7 @@ setKernelArg kernel n param =
       where size (MObjArg mobj) = fromIntegral $ sizeOf (memobjPtr mobj)
             size (VArg v) = fromIntegral $ sizeOf v
             size (StructArg xs) = fromIntegral . sum $ map sizeOf xs
-            size (LocalArrayArg x n) = fromIntegral $ n * sizeOf x        
+            size (LocalArrayArg x m) = fromIntegral $ m * sizeOf x        
 
             withPtr :: KernelArg -> (Ptr () -> IO c) -> IO c
             withPtr (MObjArg mobj) f = with (memobjPtr mobj) $ f . castPtr
@@ -161,15 +161,15 @@ getKernelInfo kernel info =
     withForeignPtr kernel $ \kernel_ptr ->
     getInfo (clGetKernelInfo_ kernel_ptr) info
   where
-    clGetKernelInfo_ kernel name size value size_ret =
+    clGetKernelInfo_ k name size value size_ret =
       checkClError "clGetKernelInfo" =<<
-        {#call unsafe clGetKernelInfo #} kernel name size value size_ret
+        {#call unsafe clGetKernelInfo #} k name size value size_ret
 
 getKernelWorkGroupInfo kernel device info =
     withForeignPtr kernel $ \kernel_ptr ->
     getInfo (clGetKernelWorkGroupInfo_ kernel_ptr device) info
   where
-    clGetKernelWorkGroupInfo_ kernel device name size value size_ret =
+    clGetKernelWorkGroupInfo_ k dev name size value size_ret =
       checkClError "clGetKernelWorkGroupInfo" =<< 
-        {#call unsafe clGetKernelWorkGroupInfo #} kernel device name size value size_ret
+        {#call unsafe clGetKernelWorkGroupInfo #} k dev name size value size_ret
 

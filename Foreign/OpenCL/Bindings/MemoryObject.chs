@@ -137,7 +137,7 @@ pokeListArray queue xs mobj = F.withArrayLen xs $ \len p -> pokeArray queue 0 le
 -- returning the memory object together with the number of elements in
 -- the list.
 newListArrayLen :: Storable a => Context -> [a] -> IO (MemObject a, Int)
-newListArrayLen context xs = create undefined xs
+newListArrayLen context ys = create undefined ys
   where
     create :: Storable a' => a' -> [a'] -> IO (MemObject a', Int)
     create x xs = F.withArrayLen xs $ \len p -> do
@@ -165,28 +165,28 @@ withListArrayLen context xs f =
 enqueueReadBuffer :: CommandQueue -> (MemObject a) -> Bool
                   -> ClSize -> ClSize -> Ptr a
                   -> [Event] -> IO Event
-enqueueReadBuffer q memobj block offset cb ptr event_wait_list =
+enqueueReadBuffer q memobj doblock offset cb ptr event_wait_list =
   withForeignPtr q $ \queue ->
   withForeignPtrs event_wait_list $ \event_ptrs ->
   withArrayNullLen event_ptrs $ \n event_array -> do
   F.alloca $ \event -> do
     checkClError_ "clEnqueueReadBuffer" =<< 
       {#call unsafe clEnqueueReadBuffer #} 
-          queue (memobjPtr memobj) (toOCLBool block) offset
+          queue (memobjPtr memobj) (toOCLBool doblock) offset
           cb (castPtr ptr) (fromIntegral n) event_array event
     attachEventFinalizer =<< peek event
 
 enqueueWriteBuffer :: Storable a => CommandQueue -> (MemObject a) -> Bool
                    -> ClSize -> ClSize -> Ptr a
                    -> [Event] -> IO Event
-enqueueWriteBuffer q memobj block offset cb ptr event_wait_list =
+enqueueWriteBuffer q memobj doblock offset cb ptr event_wait_list =
   withForeignPtr q $ \queue ->
   withForeignPtrs event_wait_list $ \event_ptrs ->
   withArrayNullLen event_ptrs $ \n event_array -> do
   F.alloca $ \event -> do
     checkClError_ "clEnqueueWriteBuffer" =<< 
       {#call unsafe clEnqueueWriteBuffer #}
-          queue (memobjPtr memobj) (toOCLBool block) offset
+          queue (memobjPtr memobj) (toOCLBool doblock) offset
           cb (castPtr ptr) (fromIntegral n) event_array event
     attachEventFinalizer =<< peek event
 
@@ -236,6 +236,6 @@ memobjContext memobj = attachContextFinalizer =<< getMemObjectInfo memobj MemCon
 -- C interfacing functions
 getMemObjectInfo memobj = getInfo $ clGetMemObjectInfo_ (memobjPtr memobj)
   where
-    clGetMemObjectInfo_ memobj name size value size_ret =
+    clGetMemObjectInfo_ mobj name size value size_ret =
       checkClError "clGetMemObjectInfo" =<< 
-        {#call unsafe clGetMemObjectInfo #} memobj name size value size_ret
+        {#call unsafe clGetMemObjectInfo #} mobj name size value size_ret

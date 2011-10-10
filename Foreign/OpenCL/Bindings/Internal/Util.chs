@@ -123,7 +123,7 @@ withArrayNullLen [] f = f 0 nullPtr
 withArrayNullLen xs f = withArrayLen xs f
 
 allocaArrays :: Storable a => [Int] -> ([Ptr a] -> IO b) -> IO b
-allocaArrays ns f  = go ns []
+allocaArrays xs f  = go xs []
   where
     go [] ptrs = f ptrs
     go (n:ns) ptrs = allocaArray n $ \ptr ->
@@ -133,14 +133,14 @@ withArrays :: Storable a => [[a]] -> ([Ptr a] -> IO b) -> IO b
 withArrays xs f  = withArraysLen xs (const f)
 
 withArraysLen :: Storable a => [[a]] -> (Int -> [Ptr a] -> IO b) -> IO b
-withArraysLen xs f  = go xs 0 []
+withArraysLen ys f  = go ys 0 []
   where
     go [] n ptrs = f n ptrs
     go (x:xs) n ptrs = withArray x $ \ptr ->
                          go xs (n+1) (ptr : ptrs)
 
 withMany :: Storable a => [a] -> ([Ptr a] -> IO b) -> IO b
-withMany xs f  = go xs []
+withMany ys f  = go ys []
   where
     go [] ptrs = f ptrs
     go (x:xs) ptrs = with x $ \ptr -> go xs (ptr : ptrs)

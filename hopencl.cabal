@@ -56,14 +56,11 @@ Library
                      Foreign.OpenCL.Bindings.Kernel
                      Foreign.OpenCL.Bindings.Synchronization
 
-  Build-depends:     base >= 4 && < 5,
-                     binary,
-                     bytestring
-
-  GHC-options:       -Wall -fno-warn-name-shadowing -fno-warn-type-defaults -fhpc -fno-warn-missing-signatures
-  Default-language:  Haskell98
+  Build-depends:     base >= 4 && < 5, bytestring
   Build-tools:       c2hs
   Extra-Libraries:   OpenCL
+  GHC-options:       -Wall -fno-warn-missing-signatures
+  Default-language:  Haskell98
   Include-dirs:      include
   Extra-lib-dirs:    /usr/lib/OpenCL/
 

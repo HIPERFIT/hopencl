@@ -75,8 +75,8 @@ createContextFromType :: DeviceType -- ^Device type that identifies
                       -> [ContextProperties] -- ^ Properties to set for the context
                       -> ContextCallback a   -- ^ A callback notification function for error-reporting 
                       -> IO Context -- ^The newly created context
-createContextFromType devtype props callback =
-  withArray0 0 (flattenContextProps props) $ \props ->
+createContextFromType devtype properties callback =
+  withArray0 0 (flattenContextProps properties) $ \props ->
   alloca $ \ep -> do
     let typ_num = (fromIntegral $ fromEnum devtype)
     ctx <- case callback of 
@@ -136,7 +136,7 @@ contextProperties context =
       where
         assembleProps :: [Int] -> [ContextProperties]
         assembleProps [] = error "Unexpected end of context property list"
-        assembleProps (x:xs) | x == 0 = []
+        assembleProps (x:_) | x == 0 = []
         assembleProps (x:xs) = let (y, xs') = assemble (toEnum x) xs
                                in y : assembleProps xs'
         assemble ClContextPlatform (x:xs') =

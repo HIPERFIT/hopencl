@@ -31,17 +31,17 @@ data ClException = ClException ClError (Maybe String)
 instance Exception ClException
 
 instance Show ClException where
-  show (ClException error (Just loc)) =
-    "OpenCL Exception: " ++ show error ++ " occurred in call to: " ++ loc
-  show (ClException error Nothing) =
-    "OpenCL Exception: " ++ show error
+  show (ClException err (Just loc)) =
+    "OpenCL Exception: " ++ show err ++ " occurred in call to: " ++ loc
+  show (ClException err Nothing) =
+    "OpenCL Exception: " ++ show err
 
 -- ^ Check error an annotate it with a location
 checkClError :: String -> ClInt -> IO ClInt
 checkClError str errcode =
   case decodeError errcode of
     Success -> return errcode
-    error -> throwIO (ClException error (Just str))
+    err -> throwIO (ClException err (Just str))
     
 
 -- ^ Check error an annotate it with a location

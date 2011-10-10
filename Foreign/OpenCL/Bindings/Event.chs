@@ -70,8 +70,8 @@ setEventCompleteCallback event user_data callbackfn =
         -- closure of the callback function if necessary
         callback :: Ptr CEvent -> CInt -> Ptr () -> IO ()
         callback _ status user_data_ptr = do
-          user_data <- peek (castPtr user_data_ptr)
-          callbackfn (toEnum $ fromIntegral status) user_data
+          udata <- peek (castPtr user_data_ptr)
+          callbackfn (toEnum $ fromIntegral status) udata
       
 -- TODO the second argument should be specified through a datatype
 setUserEventStatus :: Event -> Int -> IO ()

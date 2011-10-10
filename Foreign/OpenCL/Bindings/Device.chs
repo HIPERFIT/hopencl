@@ -53,7 +53,6 @@ import Foreign.Ptr
 import Foreign.Storable
 import Foreign.Marshal
 
-
 {# import Foreign.OpenCL.Bindings.Error #}
 {# import Foreign.OpenCL.Bindings.Internal.Types #}
 import Foreign.OpenCL.Bindings.Internal.Util
@@ -65,9 +64,9 @@ getDeviceIDs :: [DeviceType] -- ^ The types of devices to query
 getDeviceIDs typ platform =
   getList (clGetDeviceIDs_ platform (enumToBitfield typ))
  where
-  clGetDeviceIDs_ platform device_type num_entries devices num_devices =
+  clGetDeviceIDs_ pform devtype num_entries devs num_devs =
     checkClError "clGetDeviceIDs" =<< 
-      {#call unsafe clGetDeviceIDs #} platform device_type num_entries devices num_devices
+      {#call unsafe clGetDeviceIDs #} pform devtype num_entries devs num_devs
    
 getDeviceInfo device info =
     getInfo (clGetDeviceInfo_ device) info

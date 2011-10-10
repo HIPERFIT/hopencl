@@ -45,9 +45,9 @@ createCommandQueue :: Context
 createCommandQueue ctx dev props =
    withForeignPtr ctx $ \ctx_ptr ->
    alloca $ \ep -> do
-      ctx <- {#call unsafe clCreateCommandQueue #} ctx_ptr dev (enumToBitfield props) ep
+      queue <- {#call unsafe clCreateCommandQueue #} ctx_ptr dev (enumToBitfield props) ep
       checkClError_ "clCreateCommandQueue" =<< peek ep
-      attachCommandQueueFinalizer ctx
+      attachCommandQueueFinalizer queue
 
 -- | The Context to which this CommandQueue is associated
 queueContext :: CommandQueue -> IO Context
@@ -81,7 +81,7 @@ getCommandQueueInfo queue info =
     withForeignPtr queue $ \queue_ptr ->
     getInfo (clGetCommandQueueInfo_ queue_ptr) info
  where
-   clGetCommandQueueInfo_ queue name size value size_ret =
+   clGetCommandQueueInfo_ q name size value size_ret =
      checkClError "clGetCommandQueueInfo" =<< 
-       {#call unsafe clGetCommandQueueInfo #} queue name size value size_ret
+       {#call unsafe clGetCommandQueueInfo #} q name size value size_ret
 
