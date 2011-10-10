@@ -1,8 +1,18 @@
 {-# LANGUAGE ForeignFunctionInterface #-}
-#include <CL/cl.h>
+-- |
+-- Module      : Foreign.OpenCL.Bindings.MemoryObject
+-- Copyright   : (c) 2011, Martin Dybdal
+-- License     : BSD3
+-- 
+-- Maintainer  : Martin Dybdal <dybber@dybber.dk>
+-- Stability   : experimental
+-- Portability : non-portable (GHC extensions)
+--
+-- 
+-- OpenCL bindings for manipulating memory objects.
+-- See section 5.2 in the OpenCL specification
 
 module Foreign.OpenCL.Bindings.MemoryObject (
-   MemObject(..),
    mallocArray, allocaArray, free,
    peekArray, peekListArray,
    pokeArray, pokeListArray,
@@ -15,6 +25,8 @@ module Foreign.OpenCL.Bindings.MemoryObject (
    memobjHostPtr, memobjMapCount, memobjContext
    ) where
 
+#include <CL/cl.h>
+
 import Control.Exception
 import Control.Monad
 import Data.Bits
@@ -25,16 +37,10 @@ import Foreign.Ptr
 import Foreign.ForeignPtr
 import qualified Foreign.Marshal as F
 
-{#import Foreign.OpenCL.Bindings.Types #}
-{#import Foreign.OpenCL.Bindings.Error #}
-{#import Foreign.OpenCL.Bindings.Finalizers #}
-
-import Foreign.OpenCL.Bindings.Util
-
--- | Type representing OpenCL memory objects
-data MemObject a = MemObject
-   { memobjPtr :: ClMem -- ^Pointer to the underlying memory object
-   }
+{# import Foreign.OpenCL.Bindings.Error #}
+{# import Foreign.OpenCL.Bindings.Internal.Types #}
+{# import Foreign.OpenCL.Bindings.Internal.Finalizers #}
+import Foreign.OpenCL.Bindings.Internal.Util
 
 createBuffer :: Context -> [MemFlags] -> Int -> Ptr a -> IO (MemObject a)
 createBuffer context flags n value_ptr =
@@ -46,21 +52,42 @@ createBuffer context flags n value_ptr =
     checkClError_ "clCreateBuffer" =<< peek ep
     return $ MemObject memobj
 
-mallocArray :: Storable a => Context -> [MemFlags] -> Int -> IO (MemObject a)
+-- | Allocates a device memory object.
+mallocArray :: Storable a 
+            => Context -- ^ The 'Context' to which the 'MemObject' should be associated.
+            -> [MemFlags] -- ^ A list of 'MemFlags' determining permissions etc. for the 'MemObject'
+            -> Int -- ^ The number of elements to allocate memory for.
+            -> IO (MemObject a) -- ^ The type (and there by size) of elements is determined by the result type.
 mallocArray context flags n = doMalloc undefined
   where doMalloc :: Storable a' => a' -> IO (MemObject a')
         doMalloc x = createBuffer context flags (n * sizeOf x) nullPtr
 
-allocaArray :: Storable a =>
-               Context -> [MemFlags] ->
-               Int -> (MemObject a -> IO b) -> IO b
+-- | Allocates a device memory object temporarily, and makes it
+-- available for the argument function.
+allocaArray :: Storable a 
+            => Context -- ^ The 'Context' to which the 'MemObject' should be associated.
+            -> [MemFlags] -- ^ A list of 'MemFlags' determining permissions etc. for the 'MemObject'
+            -> Int -- ^ The number of elements to allocate memory for.
+            -> (MemObject a -> IO b) -- ^ The function where the 'MemObject' should be available
+            -> IO b
 allocaArray context flags n = bracket (mallocArray context flags n) free
 
+-- | Deallocates a memory object.
 free :: MemObject a -> IO ()
 free dp = do err <- {#call unsafe clReleaseMemObject #} (memobjPtr dp)
              checkClError_ "clReleaseMemObject" err
 
-peekArray :: Storable a => CommandQueue -> Int -> Int -> MemObject a -> Ptr a -> IO ()
+-- | Moves the content of a memory object from device to host exposing
+-- it as C array.
+peekArray :: Storable a 
+          => CommandQueue -- ^ The 'CommandQueue' in which this action should be queued
+          -> Int -- ^ The offset inside the 'MemObject' where the
+                 -- first element should be read. (In number of
+                 -- elements, not bytes)
+          -> Int -- ^ The number of elements to read.
+          -> MemObject a -- ^ The 'MemObject' to read from.
+          -> Ptr a -- ^ A pointer where the elements read should be stored.
+          -> IO ()
 peekArray queue offset n mobj ptr = doPeek undefined mobj >> return ()
   where
     doPeek :: Storable a' => a' -> MemObject a' -> IO Event
@@ -70,13 +97,28 @@ peekArray queue offset n mobj ptr = doPeek undefined mobj >> return ()
                                    ptr
                                    []
 
-peekListArray :: Storable a => CommandQueue -> Int -> MemObject a -> IO [a]
+-- | Moves the content of a memory object from device to host exposing
+-- it as Haskell List.
+peekListArray :: Storable a 
+              => CommandQueue 
+              -> Int -- ^ The number of elements to read.
+              -> MemObject a 
+              -> IO [a]
 peekListArray queue n mobj =
   F.allocaArray n $ \p -> do
     peekArray   queue 0 n mobj p
     F.peekArray n p
 
-pokeArray :: Storable a => CommandQueue -> Int -> Int -> Ptr a -> MemObject a -> IO ()
+-- | Moves a host side C array to a device-side memory object
+pokeArray :: Storable a 
+          => CommandQueue 
+          -> Int -- ^ The offset inside the 'MemObject' where the
+                 -- first element should be written. (In number of
+                 -- elements, not bytes)
+          -> Int -- ^ The number of elements to write.
+          -> Ptr a -- ^ A pointer where the elements should be read from
+          -> MemObject a -- ^ The 'MemObject' to write the elements to
+          -> IO ()
 pokeArray queue offset n ptr mobj = doPoke undefined mobj >> return ()
   where
     doPoke :: Storable a' => a' -> MemObject a' -> IO Event
@@ -87,9 +129,13 @@ pokeArray queue offset n ptr mobj = doPoke undefined mobj >> return ()
                                     []
       where s = sizeOf x
 
+-- | Moves a host side Haskell list to a device-side memory object
 pokeListArray :: Storable a => CommandQueue -> [a] -> MemObject a -> IO ()
 pokeListArray queue xs mobj = F.withArrayLen xs $ \len p -> pokeArray queue 0 len p mobj
 
+-- | Create a memory object containing the specified list of elements,
+-- returning the memory object together with the number of elements in
+-- the list.
 newListArrayLen :: Storable a => Context -> [a] -> IO (MemObject a, Int)
 newListArrayLen context xs = create undefined xs
   where
@@ -98,6 +144,7 @@ newListArrayLen context xs = create undefined xs
                     mobj <- createBuffer context [MemCopyHostPtr] (sizeOf x * len) p
                     return (mobj, len)
 
+-- | Create a memory object containing the specified list of elements.
 newListArray :: Storable a => Context -> [a] -> IO (MemObject a)
 newListArray context xs = fst `fmap` newListArrayLen context xs
 
@@ -158,9 +205,12 @@ enqueueCopyBuffer q memobjSrc memobjDst offsetSrc offsetDst cb event_wait_list =
           cb (fromIntegral n) event_array event
     attachEventFinalizer =<< peek event
 
+
+-- | The type of a memory object
 memobjType :: MemObject a -> IO MemObjectType
 memobjType memobj = liftM toEnum $ getMemObjectInfo memobj MemType
 
+-- | The flags specified when a memory object was allocated
 memobjFlags :: MemObject a -> IO [MemFlags]
 memobjFlags memobj = do
    flags <- (getMemObjectInfo memobj MemFlags)
@@ -168,6 +218,7 @@ memobjFlags memobj = do
       $ [MemReadWrite, MemWriteOnly, MemReadOnly,
          MemUseHostPtr, MemAllocHostPtr, MemCopyHostPtr]
 
+-- | The size of a memory object
 memobjSize :: MemObject a -> IO CSize
 memobjSize memobj = getMemObjectInfo memobj MemSize
 
@@ -177,6 +228,7 @@ memobjHostPtr memobj = getMemObjectInfo memobj MemHostPtr
 memobjMapCount :: MemObject a -> IO Int
 memobjMapCount memobj = getMemObjectInfo memobj MemMapCount
 
+-- | The 'Context' this memory object is associated with.
 memobjContext :: MemObject a -> IO Context
 memobjContext memobj = attachContextFinalizer =<< getMemObjectInfo memobj MemContext
 

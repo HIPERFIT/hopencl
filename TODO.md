@@ -1,11 +1,6 @@
 Tasks
 -----
   - Write tests
-      * clCreateContextFromType
-      * clCreateProgramWithBinary
-      * clUnloadCompiler
-      * Synchronization primitives
-      * callback functions and clSetUserEventStatus
 
   - Code coverage of c2hs files when running tests
 
@@ -16,6 +11,8 @@ Tasks
 
   - Use clCreateProgramWithBinary and programBinaries to implement a
     file based storage of compiled kernels.
+    
+  - Review dependency list in .cabal
 
 Missing functionality
 ---------------------
@@ -23,6 +20,7 @@ The following would be nice to have, but there are no current plans of
 implementing. Please send me and email if you find them necessary.
 
 These operations are currently not supported:
+
   * clCreateSubBuffer
   * clEnqueueReadBufferRect
   * clEnqueueWriteBufferRect
@@ -32,6 +30,7 @@ These operations are currently not supported:
   * clEnqueueNativeKernel
 
 The following full sections of the OpenCL standard are not supported:
+
   * Image Objects (section 5.3)
   * Sampler Objects (section 5.5)
   * Profiling of memory objects and kernels (section 5.12)

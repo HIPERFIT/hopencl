@@ -1,7 +1,13 @@
 {-# LANGUAGE ForeignFunctionInterface, DeriveDataTypeable #-}
-
-#include <CL/cl.h>
-#include <cl_enums.h>
+-- |
+-- Module      : Foreign.OpenCL.Bindings.Error
+-- Copyright   : (c) 2011, Martin Dybdal
+-- License     : BSD3
+-- 
+-- Maintainer  : Martin Dybdal <dybber@dybber.dk>
+-- Stability   : experimental
+-- Portability : non-portable (GHC extensions)
+--
 
 module Foreign.OpenCL.Bindings.Error (
     ClException(..), ClError(..),
@@ -9,7 +15,10 @@ module Foreign.OpenCL.Bindings.Error (
   )
 where
 
-{# import Foreign.OpenCL.Bindings.Types #} (ClInt)
+#include <CL/cl.h>
+#include <cl_enums.h>
+  
+{# import Foreign.OpenCL.Bindings.Internal.Types #} (ClInt)
 
 import Control.Exception hiding (assert)
 import Data.Typeable

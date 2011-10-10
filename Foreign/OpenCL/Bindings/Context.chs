@@ -1,9 +1,25 @@
 {-# LANGUAGE ForeignFunctionInterface, GADTs #-}
-#include <CL/cl.h>
+-- |
+-- Module      : Foreign.OpenCL.Bindings.Context
+-- Copyright   : (c) 2011, Martin Dybdal
+-- License     : BSD3
+-- 
+-- Maintainer  : Martin Dybdal <dybber@dybber.dk>
+-- Stability   : experimental
+-- Portability : non-portable (GHC extensions)
+--
+-- 
+-- OpenCL bindings for contexts. Contexts are used by the OpenCL
+-- runtime for managing objects such as command-queues, memory,
+-- program and kernel objects and for executing kernels on one or more
+-- devices specified in the context. See section 4.3 in the OpenCL
+-- specification
 
 module Foreign.OpenCL.Bindings.Context (
    createContext , createContextFromType, contextDevices, contextProperties, ContextCallback(..)
   ) where
+
+#include <CL/cl.h>
 
 import Control.Monad
 
@@ -11,23 +27,25 @@ import Foreign
 import Foreign.C.Types
 import Foreign.C.String
 
-{# import Foreign.OpenCL.Bindings.Types #}
 {# import Foreign.OpenCL.Bindings.Error #}
-{# import Foreign.OpenCL.Bindings.Finalizers #}
+{# import Foreign.OpenCL.Bindings.Internal.Types #}
+{# import Foreign.OpenCL.Bindings.Internal.Finalizers #}
+import Foreign.OpenCL.Bindings.Internal.Util
 
-import Foreign.OpenCL.Bindings.Util
-
+-- | Used to specify the callback notification function that will
+-- receive reports on errors in a context.
 data ContextCallback a where
   NoContextCallback :: ContextCallback ()
   ContextCallback :: Storable a => a ->  (String -> a -> IO ()) -> ContextCallback a
 
--- |Create a new context that includes the given devices, and where errors are
+-- |Create a new context that includes the given devices.
 --
--- We do not currently support retrieving error reports through the
--- callback function.
+-- Information on errors that occur in the context are reported to the
+-- optional callback function. The callback function may be called
+-- asynchronously by the OpenCL implementation.
 createContext :: [DeviceID] -- ^Devices to include in this context
-              -> [ContextProperties]
-              -> ContextCallback a
+              -> [ContextProperties] -- ^ Properties to set for the context
+              -> ContextCallback a   -- ^ A callback notification function for error-reporting 
               -> IO Context -- ^The newly created context
 createContext devs props callback =
   withArray0 0 (flattenContextProps props) $ \pps ->
@@ -45,15 +63,17 @@ createContext devs props callback =
     checkClError_ "clCreateContext" =<< peek ep
     attachContextFinalizer ctx
 
--- |Create a new context including devices of a given type.
+-- |Create a new context from a device type that identifies the
+-- specific device(s) to include in the context.  
 --
--- We do not currently support retrieving error reports through the
--- callback function.
+-- Information on errors that occur in the context are reported to the
+-- optional callback function. The callback function may be called
+-- asynchronously by the OpenCL implementation.
 createContextFromType :: DeviceType -- ^Device type that identifies
                                     -- the individial device(s) to
                                     -- include in this context
-                      -> [ContextProperties]
-                      -> ContextCallback a
+                      -> [ContextProperties] -- ^ Properties to set for the context
+                      -> ContextCallback a   -- ^ A callback notification function for error-reporting 
                       -> IO Context -- ^The newly created context
 createContextFromType devtype props callback =
   withArray0 0 (flattenContextProps props) $ \props ->
@@ -92,12 +112,13 @@ flattenContextProps = concatMap flatten
     flatten (ContextPlatform p) = [ fromIntegral $ fromEnum ClContextPlatform
                                   , fromIntegral $ ptrToWordPtr p]
 
+-- | Obtain the devices included in the context
 contextDevices :: Context -> IO [DeviceID]
 contextDevices context =
   withForeignPtr context $ \ctx ->
     getInfo (clGetContextInfo_ ctx) ContextDevices
 
--- | Obtain the context properties associated with a device
+-- | Obtain the context properties defined for a context.
 contextProperties :: Context -> IO [ContextProperties]
 contextProperties context =
    withForeignPtr context $ \ctx ->

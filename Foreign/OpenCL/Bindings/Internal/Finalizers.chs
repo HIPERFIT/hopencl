@@ -1,7 +1,7 @@
 {-# LANGUAGE ForeignFunctionInterface #-}
 #include <CL/cl.h>
 
-module Foreign.OpenCL.Bindings.Finalizers (
+module Foreign.OpenCL.Bindings.Internal.Finalizers (
   attachContextFinalizer,
   attachCommandQueueFinalizer,
   attachProgramFinalizer,
@@ -13,7 +13,7 @@ where
 import Foreign.Ptr
 import Foreign.ForeignPtr
 
-{# import Foreign.OpenCL.Bindings.Types #}
+{# import Foreign.OpenCL.Bindings.Internal.Types #}
 
 -- Context --
 attachContextFinalizer :: ClContext -> IO Context

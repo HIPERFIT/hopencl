@@ -1,11 +1,23 @@
 {-# LANGUAGE ForeignFunctionInterface #-}
-#include <CL/cl.h>
+-- |
+-- Module      : Foreign.OpenCL.Bindings.Program
+-- Copyright   : (c) 2011, Martin Dybdal
+-- License     : BSD3
+-- 
+-- Maintainer  : Martin Dybdal <dybber@dybber.dk>
+-- Stability   : experimental
+-- Portability : non-portable (GHC extensions)
+--
+-- 
+-- Loading and compilation of OpenCL programs.
 
 module Foreign.OpenCL.Bindings.Program (
    createProgram, createProgramWithBinary,
    buildProgram, unloadCompiler,
    programContext, programDevices, programSource, programBinaries
   ) where
+
+#include <CL/cl.h>
 
 import Control.Applicative
 import Control.Monad
@@ -16,10 +28,10 @@ import Foreign.C.String
 
 import qualified Data.ByteString as B
 
-{# import Foreign.OpenCL.Bindings.Types #}
 {# import Foreign.OpenCL.Bindings.Error #}
-{# import Foreign.OpenCL.Bindings.Finalizers #}
-import Foreign.OpenCL.Bindings.Util
+{# import Foreign.OpenCL.Bindings.Internal.Types #}
+{# import Foreign.OpenCL.Bindings.Internal.Finalizers #}
+import Foreign.OpenCL.Bindings.Internal.Util
 
 -- | Create a program from a string containing the source code
 --
@@ -60,7 +72,13 @@ createProgramWithBinary ctx devs_and_bins =
         mapM_ (checkClError "createProgramWithBinary -") =<< peekArray n binary_status
         attachProgramFinalizer prog
 
-buildProgram :: Program -> [DeviceID] -> String -> IO ()
+-- | Compile a program for a given set of devices.
+buildProgram :: Program -- ^ The program to compile
+             -> [DeviceID] -- ^ List of devices to compile for
+             -> String
+               -- ^ Compiler arguments, see OpenCL specification for
+               -- possible values.
+             -> IO ()
 buildProgram p devs opts =
   withForeignPtr p $ \prog ->
   withArrayLen devs $ \n dev_ptr ->
@@ -81,20 +99,34 @@ buildProgram p devs opts =
      else return ()
    checkClError_ "clBuildProgram" err
 
+-- | Hints to the OpenCL implementation that the resources allocated
+-- by the OpenCL compiler can be released. It does not guarantee that
+-- the compiler will not be used in the future or that the compiler
+-- will actually be unloaded by the implementation. Calls to
+-- 'buildProgram' after 'unloadCompiler' will reload the compiler, if
+-- necessary, to build the appropriate program executable.
 unloadCompiler :: IO ()
 unloadCompiler = checkClError_ "clUnloadCompiler" =<< {#call unsafe clUnloadCompiler #}
 
+-- | The context to which the 'Program' is associated
 programContext :: Program -> IO Context
 programContext prog = attachContextFinalizer =<< getProgramInfo prog ProgramContext
 
+-- | The devices to which the 'Program' is associated
 programDevices :: Program -> IO [DeviceID]
 programDevices prog = getProgramInfo prog ProgramDevices
 
+-- TODO how does the following behave for a program created through
+-- createProgramFromBinary?
+
+-- | The source code of the 'Program' as specified in the call to
+-- createProgram.
 programSource :: Program -> IO String
 programSource prog = getProgramInfo prog ProgramSource
 
--- Collects binaries for an unspecified subset of the devices
--- associated with the program (depending on which it is compiled to=
+-- | Collects binaries for an unspecified subset of the devices
+-- associated with the 'Program' (depending on which it is compiled
+-- to)
 programBinaries :: Program -> IO [(DeviceID, B.ByteString)]
 programBinaries prog =
   withForeignPtr prog $ \program_ptr -> do

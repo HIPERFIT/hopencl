@@ -1,5 +1,15 @@
 {-# LANGUAGE ForeignFunctionInterface, GADTs #-}
-#include <CL/cl.h>
+-- |
+-- Module      : Foreign.OpenCL.Bindings.Kernel
+-- Copyright   : (c) 2011, Martin Dybdal
+-- License     : BSD3
+-- 
+-- Maintainer  : Martin Dybdal <dybber@dybber.dk>
+-- Stability   : experimental
+-- Portability : non-portable (GHC extensions)
+--
+-- 
+-- OpenCL kernel creation, invocation and scheduling.
 
 module Foreign.OpenCL.Bindings.Kernel (
    createKernel,
@@ -13,18 +23,18 @@ module Foreign.OpenCL.Bindings.Kernel (
    KernelArg(..), setKernelArg, setKernelArgs
   ) where
 
+#include <CL/cl.h>
+
 import Control.Monad
 
 import Foreign
 import Foreign.C.String
 import Foreign.C.Types
 
-{# import Foreign.OpenCL.Bindings.Types #}
 {# import Foreign.OpenCL.Bindings.Error #}
-{# import Foreign.OpenCL.Bindings.Finalizers #}
-{# import Foreign.OpenCL.Bindings.MemoryObject #}
-
-import Foreign.OpenCL.Bindings.Util
+{# import Foreign.OpenCL.Bindings.Internal.Types #}
+{# import Foreign.OpenCL.Bindings.Internal.Finalizers #}
+import Foreign.OpenCL.Bindings.Internal.Util
 
 -- | Create a program from a string containing the source code
 --
@@ -39,7 +49,13 @@ createKernel prog name =
       checkClError_ "clCreateKernel" =<< peek ep
       attachKernelFinalizer kernel
 
-enqueueNDRangeKernel :: CommandQueue -> Kernel -> [ClSize] -> [ClSize] -> [ClSize] -> [Event] -> IO Event
+enqueueNDRangeKernel :: CommandQueue 
+                     -> Kernel
+                     -> [ClSize] -- ^ Global work offsets
+                     -> [ClSize] -- ^ Global work sizes
+                     -> [ClSize] -- ^ Local work sizes
+                     -> [Event] 
+                     -> IO Event
 enqueueNDRangeKernel cq k globalWorkOffsets globalWorkSizes localWorkSizes waitEvs =
     withForeignPtr cq $ \queue ->
     withForeignPtr k $ \kernel ->
@@ -95,8 +111,6 @@ setKernelArg kernel n param =
             pokeElems :: Storable a => Ptr a -> [a] -> IO ()
             pokeElems ptr (x:xs) = poke ptr x >> pokeElems (plusPtr ptr (sizeOf x)) xs
             pokeElems _ [] = return ()
-
-
 
 setKernelArgs :: Kernel -> [KernelArg] -> IO ()
 setKernelArgs kernel args = zipWithM_ (setKernelArg kernel) [0..] args

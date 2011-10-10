@@ -1,10 +1,21 @@
 {-# LANGUAGE ForeignFunctionInterface #-}
-#include <CL/cl.h>
+-- |
+-- Module      : Foreign.OpenCL.Bindings.Device
+-- Copyright   : (c) 2011, Martin Dybdal
+-- License     : BSD3
+-- 
+-- Maintainer  : Martin Dybdal <dybber@dybber.dk>
+-- Stability   : experimental
+-- Portability : non-portable (GHC extensions)
+--
+-- OpenCL bindings for querying a list of available device and
+-- information about those devices. See section 4.2 in the OpenCL
+-- specification
 
 module Foreign.OpenCL.Bindings.Device (
    getDeviceIDs,
 
-   -- |The following functions and types are used to obtain properties of
+   -- The following functions are used to obtain properties of
    -- devices.
    deviceAddressBits, deviceAvailable, deviceCompilerAvailable,
    deviceEndianLittle, deviceErrorCorrectionSupport,
@@ -30,6 +41,8 @@ module Foreign.OpenCL.Bindings.Device (
    deviceType, deviceVendor, deviceVendorID, deviceVersion, deviceDriverVersion
  ) where
 
+#include <CL/cl.h>
+
 import Control.Monad
 import Control.Applicative
 
@@ -40,12 +53,15 @@ import Foreign.Ptr
 import Foreign.Storable
 import Foreign.Marshal
 
-{# import Foreign.OpenCL.Bindings.Types #}
-{# import Foreign.OpenCL.Bindings.Error #}
-import Foreign.OpenCL.Bindings.Util
 
--- ^Obtain a list of available platforms.
-getDeviceIDs ::  [DeviceType] -> PlatformID -> IO [DeviceID]
+{# import Foreign.OpenCL.Bindings.Error #}
+{# import Foreign.OpenCL.Bindings.Internal.Types #}
+import Foreign.OpenCL.Bindings.Internal.Util
+
+-- ^Obtain a list of available devices on a platform.
+getDeviceIDs :: [DeviceType] -- ^ The types of devices to query
+             -> PlatformID
+             -> IO [DeviceID]
 getDeviceIDs typ platform =
   getList (clGetDeviceIDs_ platform (enumToBitfield typ))
  where

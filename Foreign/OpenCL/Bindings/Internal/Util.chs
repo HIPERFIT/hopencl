@@ -1,13 +1,13 @@
 {-# LANGUAGE FlexibleInstances, UndecidableInstances,
              OverlappingInstances, ScopedTypeVariables #-}
 
-module Foreign.OpenCL.Bindings.Util where
+module Foreign.OpenCL.Bindings.Internal.Util where
 
 import Foreign
 import Foreign.C.String
 
-import Foreign.OpenCL.Bindings.Types
-import Foreign.OpenCL.Bindings.Error
+{# import Foreign.OpenCL.Bindings.Internal.Types #}
+{# import Foreign.OpenCL.Bindings.Error #}
 
 -- A class for retrieving information about different OpenCL objects.
 -- Exports getInfo which is polymorhic in its output

@@ -1,24 +1,35 @@
 {-# LANGUAGE ForeignFunctionInterface #-}
-#include <CL/cl.h>
+-- |
+-- Module      : Foreign.OpenCL.Bindings.Event
+-- Copyright   : (c) 2011, Martin Dybdal
+-- License     : BSD3
+-- 
+-- Maintainer  : Martin Dybdal <dybber@dybber.dk>
+-- Stability   : experimental
+-- Portability : non-portable (GHC extensions)
+--
+-- 
+-- OpenCL event handling.
 
 module Foreign.OpenCL.Bindings.Event (
-   createUserEvent,
+   createUserEvent, waitForEvents,
 
    eventCommandQueue, eventContext, eventCommandType,
    
-   setEventCompleteCallback, setUserEventStatus, wrapCallback
+   setEventCompleteCallback, setUserEventStatus
   ) where
+
+#include <CL/cl.h>
 
 import Control.Monad
 
 import Foreign
 import Foreign.C.Types
 
-{#import Foreign.OpenCL.Bindings.Types #}
-{#import Foreign.OpenCL.Bindings.Error #}
-{#import Foreign.OpenCL.Bindings.Finalizers #}
-
-import Foreign.OpenCL.Bindings.Util
+{# import Foreign.OpenCL.Bindings.Error #}
+{# import Foreign.OpenCL.Bindings.Internal.Types #}
+{# import Foreign.OpenCL.Bindings.Internal.Finalizers #}
+import Foreign.OpenCL.Bindings.Internal.Util
 
 -- |Create a new user event
 createUserEvent :: Context
@@ -73,6 +84,16 @@ foreign import ccall "wrapper" wrapCallback ::
                 (Ptr CEvent -> CInt -> Ptr () -> IO ())
   -> IO (FunPtr (Ptr CEvent -> CInt -> Ptr () -> IO ()))
 
+
+-- | Waits on the host thread for commands identified by event objects
+-- in event_list to complete. A command is considered complete if its
+-- execution status is CL_COMPLETE or a negative value.
+waitForEvents :: [Event] -> IO ()
+waitForEvents events =
+  withForeignPtrs events $ \event_ptrs ->
+  withArrayLen event_ptrs $ \n event_array -> do
+    checkClError_ "clWaitForEvents" =<<
+      {# call unsafe clWaitForEvents #} (fromIntegral n) event_array
 
 -- C interfacing functions
 clCreateUserEvent_ = {#call unsafe clCreateUserEvent #}
