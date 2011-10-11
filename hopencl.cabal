@@ -36,7 +36,28 @@ Copyright:           Copyright (c) 2011. Martin Dybdal <dybber@dybber.dk>
 Tested-with:         GHC == 7.0.3
 Build-type:          Custom
 Cabal-version:       >= 1.10
+
 Extra-source-files:  README
+                     prepare-install.sh
+                     include/cl_enums.h
+
+                     -- OpenCL headers
+                     include/CL/cl_ext.h
+                     include/CL/cl_gl_ext.h
+                     include/CL/cl_gl.h
+                     include/CL/cl.h
+                     include/CL/cl.hpp
+                     include/CL/cl_platform.h
+                     include/CL/opencl.h
+
+                     -- Unit tests
+                     tests/unit/HOpenCL_Test.hs
+                     tests/unit/Test_Util.hs
+                     tests/unit/HOpenCL/CommandQueue_Test.hs
+                     tests/unit/HOpenCL/Context_Test.hs
+                     tests/unit/HOpenCL/Device_Test.hs
+                     tests/unit/HOpenCL/Platform_Test.hs
+                     tests/unit/HOpenCL/Program_Test.hs
 
 Library
   Other-modules:     Foreign.OpenCL.Bindings.Internal.Types

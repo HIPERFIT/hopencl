@@ -8,7 +8,10 @@ import qualified HOpenCL.Context_Test
 import qualified HOpenCL.CommandQueue_Test
 import qualified HOpenCL.Program_Test
 
-main = defaultMain [tests]
+
+-- Use plain output format, to avoid terminal color annotations
+main = do opts <- interpretArgsOrExit ["--plain"]
+          defaultMainWithOpts [tests] opts
 
 tests = testGroup "HopenCL"
         [ HOpenCL.Platform_Test.tests
