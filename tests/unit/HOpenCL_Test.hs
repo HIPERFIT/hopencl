@@ -1,4 +1,3 @@
-
 module Main where
 
 import Test.Framework
@@ -7,7 +6,6 @@ import qualified HOpenCL.Device_Test
 import qualified HOpenCL.Context_Test
 import qualified HOpenCL.CommandQueue_Test
 import qualified HOpenCL.Program_Test
-
 
 -- Use plain output format, to avoid terminal color annotations
 main = do opts <- interpretArgsOrExit ["--plain"]

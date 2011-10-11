@@ -125,8 +125,8 @@ contextProperties context =
    alloca $ \sp -> do
       -- Get the size of the context properties region.
       _ <- clGetContextInfo_ ctx (fromIntegral $ fromEnum ContextProperties) 0 nullPtr sp
-      -- Allocate some space for the properties
       size <- peek sp
+      -- Allocate some space for the properties
       allocaBytes (fromIntegral size) $ \pp -> do
          _ <- clGetContextInfo_ ctx (fromIntegral $ fromEnum ContextProperties) (fromIntegral size) pp sp
          size' <- peek sp
@@ -135,14 +135,14 @@ contextProperties context =
          return . assembleProps =<< peekArray n (castPtr pp)
       where
         assembleProps :: [Int] -> [ContextProperties]
-        assembleProps [] = error "Unexpected end of context property list"
+        assembleProps [] = []
         assembleProps (x:_) | x == 0 = []
         assembleProps (x:xs) = let (y, xs') = assemble (toEnum x) xs
                                in y : assembleProps xs'
+        assemble _ [] = error "Unexpected end of context property list"
         assemble ClContextPlatform (x:xs') =
           let p = ContextPlatform . wordPtrToPtr $ fromIntegral x
           in (p, xs')
-            -- TODO check non-exhaustive pattern warning
 
 -- C interfacing functions
 clGetContextInfo_ :: Ptr CContext -> CUInt -> CULong -> Ptr () -> Ptr CULong -> IO CInt

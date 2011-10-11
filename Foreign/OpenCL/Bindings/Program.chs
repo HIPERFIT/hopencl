@@ -116,11 +116,11 @@ programContext prog = attachContextFinalizer =<< getProgramInfo prog ProgramCont
 programDevices :: Program -> IO [DeviceID]
 programDevices prog = getProgramInfo prog ProgramDevices
 
--- TODO how does the following behave for a program created through
--- createProgramFromBinary?
-
 -- | The source code of the 'Program' as specified in the call to
--- createProgram.
+-- createProgram. If program is created using createProgramWithBinary,
+-- an empty string or the appropriate program source code is returned
+-- depending on whether or not the program source code is stored in
+-- the binary.
 programSource :: Program -> IO String
 programSource prog = getProgramInfo prog ProgramSource
 

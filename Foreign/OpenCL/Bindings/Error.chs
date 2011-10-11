@@ -53,7 +53,6 @@ checkClError_ str errcode = checkClError str errcode >> return ()
 decodeError :: ClInt -> ClError
 decodeError = toEnum . fromIntegral
 
--- TODO: Implement properly by extending data type
 throwError :: String -> IO ()
 throwError str = throwIO $ ClException Success (Just str)
 

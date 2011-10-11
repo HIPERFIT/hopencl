@@ -17,8 +17,8 @@ Description:         The bindings follows version 1.1 of the OpenCL specificatio
                      .
                        * OpenGL and D3D related functions
                      .
-                     In addition, the following list of functions
-                     doesn't have Haskell wrappers currently:
+                     In addition, the are not currently any Haskell
+                     wrappers for the following functions:
                      .
                        clCreateSubBuffer, clEnqueueReadBufferRect,
                        clEnqueueWriteBufferRect,
