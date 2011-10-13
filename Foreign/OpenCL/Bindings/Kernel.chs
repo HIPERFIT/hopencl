@@ -47,7 +47,7 @@ createKernel prog name =
    alloca $ \ep -> do
       kernel <- {# call unsafe clCreateKernel #} prog_ptr cstr ep
       checkClError_ "clCreateKernel" =<< peek ep
-      attachKernelFinalizer kernel
+      attachFinalizer kernel
 
 enqueueNDRangeKernel :: CommandQueue 
                      -> Kernel
@@ -74,7 +74,7 @@ enqueueNDRangeKernel cq k globalWorkOffsets globalWorkSizes localWorkSizes waitE
                    (fromIntegral n)
                    event_array
                    eventPtr
-       attachEventFinalizer =<< peek eventPtr
+       attachFinalizer =<< peek eventPtr
   where workDim = fromIntegral . maximum $ map length [globalWorkOffsets, globalWorkSizes, localWorkSizes]
 
 data KernelArg where
@@ -129,10 +129,11 @@ enqueueTask cq k waitEvs =
                    (fromIntegral n)
                    event_array
                    eventPtr
-       attachEventFinalizer =<< peek eventPtr
+       attachFinalizer =<< peek eventPtr
 
 kernelContext :: Kernel -> IO Context
-kernelContext kernel = attachContextFinalizer =<< getKernelInfo kernel KernelContext
+kernelContext kernel = 
+  getKernelInfo kernel KernelContext >>= attachRetainFinalizer
 
 kernelFunctionName :: Kernel -> IO String
 kernelFunctionName kernel = getKernelInfo kernel KernelFunctionName

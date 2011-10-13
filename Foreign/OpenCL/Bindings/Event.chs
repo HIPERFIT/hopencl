@@ -37,19 +37,21 @@ createUserEvent :: Context
 createUserEvent context =
   withForeignPtr context $ \ctx ->
   alloca $ \ep -> do
-    event <- clCreateUserEvent_ ctx ep
+    event <- {#call unsafe clCreateUserEvent #} ctx ep
     checkClError_ "clCreateUserEvent" =<< peek ep
-    attachEventFinalizer event
+    attachFinalizer event
 
 getEventInfo event info =
     withForeignPtr event $ \event_ptr ->
     getInfo (clGetEventInfo_ event_ptr) info
 
 eventCommandQueue :: Event -> IO CommandQueue
-eventCommandQueue ev = attachCommandQueueFinalizer =<< getEventInfo ev EventCommandQueue
+eventCommandQueue ev = 
+  getEventInfo ev EventCommandQueue >>= attachRetainFinalizer
 
 eventContext :: Event -> IO Context
-eventContext ev = attachContextFinalizer =<< getEventInfo ev EventContext
+eventContext ev = 
+  getEventInfo ev EventContext >>= attachRetainFinalizer
 
 eventCommandType :: Event -> IO CommandType
 eventCommandType ev = liftM toEnum $ getEventInfo ev EventCommandType
@@ -96,9 +98,6 @@ waitForEvents events =
       {# call unsafe clWaitForEvents #} (fromIntegral n) event_array
 
 -- C interfacing functions
-clCreateUserEvent_ = {#call unsafe clCreateUserEvent #}
-
-clGetEventInfo_ event name size value size_ret =
-  checkClError "clGetEventInfo" =<<
-    {#call unsafe clGetEventInfo #} event name size value size_ret
+clGetEventInfo_ = 
+  checkClError5 "clGetEventInfo" {#call unsafe clGetEventInfo #}
 

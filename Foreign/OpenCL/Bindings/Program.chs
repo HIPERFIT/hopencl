@@ -46,7 +46,7 @@ createProgram ctx str =
    alloca $ \ep -> do
       prog <- {#call unsafe clCreateProgramWithSource #} ctx_ptr 1 cstr_ptr len_ptr ep
       checkClError_ "clCreateProgramWithSource" =<< peek ep
-      attachProgramFinalizer prog
+      attachFinalizer prog
 
 -- | Create a program from the ByteStrings obtained from
 -- programBinaries
@@ -70,7 +70,7 @@ createProgramWithBinary ctx devs_and_bins =
                     bin_arr binary_status ep
         checkClError_ "createProgramWithBinary" =<< peek ep
         mapM_ (checkClError "createProgramWithBinary -") =<< peekArray n binary_status
-        attachProgramFinalizer prog
+        attachFinalizer prog
 
 -- | Compile a program for a given set of devices.
 buildProgram :: Program -- ^ The program to compile
@@ -110,7 +110,8 @@ unloadCompiler = checkClError_ "clUnloadCompiler" =<< {#call unsafe clUnloadComp
 
 -- | The context to which the 'Program' is associated
 programContext :: Program -> IO Context
-programContext prog = attachContextFinalizer =<< getProgramInfo prog ProgramContext
+programContext prog = 
+  getProgramInfo prog ProgramContext >>= attachRetainFinalizer
 
 -- | The devices to which the 'Program' is associated
 programDevices :: Program -> IO [DeviceID]

@@ -174,7 +174,7 @@ enqueueReadBuffer q memobj doblock offset cb ptr event_wait_list =
       {#call unsafe clEnqueueReadBuffer #} 
           queue (memobjPtr memobj) (toOCLBool doblock) offset
           cb (castPtr ptr) (fromIntegral n) event_array event
-    attachEventFinalizer =<< peek event
+    attachFinalizer =<< peek event
 
 enqueueWriteBuffer :: Storable a => CommandQueue -> (MemObject a) -> Bool
                    -> ClSize -> ClSize -> Ptr a
@@ -188,7 +188,7 @@ enqueueWriteBuffer q memobj doblock offset cb ptr event_wait_list =
       {#call unsafe clEnqueueWriteBuffer #}
           queue (memobjPtr memobj) (toOCLBool doblock) offset
           cb (castPtr ptr) (fromIntegral n) event_array event
-    attachEventFinalizer =<< peek event
+    attachFinalizer =<< peek event
 
 enqueueCopyBuffer :: CommandQueue -> (MemObject a) -> (MemObject a)
                   -> ClSize -> ClSize -> ClSize
@@ -203,7 +203,7 @@ enqueueCopyBuffer q memobjSrc memobjDst offsetSrc offsetDst cb event_wait_list =
           queue (memobjPtr memobjSrc) (memobjPtr memobjDst)
           offsetSrc offsetDst
           cb (fromIntegral n) event_array event
-    attachEventFinalizer =<< peek event
+    attachFinalizer =<< peek event
 
 
 -- | The type of a memory object
@@ -230,12 +230,11 @@ memobjMapCount memobj = getMemObjectInfo memobj MemMapCount
 
 -- | The 'Context' this memory object is associated with.
 memobjContext :: MemObject a -> IO Context
-memobjContext memobj = attachContextFinalizer =<< getMemObjectInfo memobj MemContext
-
+memobjContext memobj = 
+  getMemObjectInfo memobj MemContext >>= attachRetainFinalizer
 
 -- C interfacing functions
 getMemObjectInfo memobj = getInfo $ clGetMemObjectInfo_ (memobjPtr memobj)
   where
-    clGetMemObjectInfo_ mobj name size value size_ret =
-      checkClError "clGetMemObjectInfo" =<< 
-        {#call unsafe clGetMemObjectInfo #} mobj name size value size_ret
+    clGetMemObjectInfo_ = 
+      checkClError5 "clGetMemObjectInfo" {#call unsafe clGetMemObjectInfo #}

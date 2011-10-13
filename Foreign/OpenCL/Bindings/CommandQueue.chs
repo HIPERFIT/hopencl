@@ -45,13 +45,14 @@ createCommandQueue :: Context
 createCommandQueue ctx dev props =
    withForeignPtr ctx $ \ctx_ptr ->
    alloca $ \ep -> do
-      queue <- {#call unsafe clCreateCommandQueue #} ctx_ptr dev (enumToBitfield props) ep
+      queue <- {# call unsafe clCreateCommandQueue #} ctx_ptr dev (enumToBitfield props) ep
       checkClError_ "clCreateCommandQueue" =<< peek ep
-      attachCommandQueueFinalizer queue
+      attachFinalizer queue
 
 -- | The Context to which this CommandQueue is associated
 queueContext :: CommandQueue -> IO Context
-queueContext queue = attachContextFinalizer =<< getCommandQueueInfo queue QueueContext
+queueContext queue = getCommandQueueInfo queue QueueContext 
+                       >>= attachRetainFinalizer
 
 -- | The DeviceID of the device to which this CommandQueue is associated
 queueDevice :: CommandQueue -> IO DeviceID
@@ -81,7 +82,7 @@ getCommandQueueInfo queue info =
     withForeignPtr queue $ \queue_ptr ->
     getInfo (clGetCommandQueueInfo_ queue_ptr) info
  where
-   clGetCommandQueueInfo_ q name size value size_ret =
-     checkClError "clGetCommandQueueInfo" =<< 
-       {#call unsafe clGetCommandQueueInfo #} q name size value size_ret
+   clGetCommandQueueInfo_ = 
+     checkClError5 "clGetCommandQueueInfo" 
+                   {# call unsafe clGetCommandQueueInfo #}
 

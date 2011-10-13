@@ -11,7 +11,7 @@ import qualified HOpenCL.Program_Test
 main = do opts <- interpretArgsOrExit ["--plain"]
           defaultMainWithOpts [tests] opts
 
-tests = testGroup "HopenCL"
+tests = testGroup "HOpenCL"
         [ HOpenCL.Platform_Test.tests
         , HOpenCL.Device_Test.tests
         , HOpenCL.Context_Test.tests

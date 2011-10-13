@@ -61,7 +61,7 @@ createContext devs props callback =
                  cb_funptr <- mkCallback fn
                  {#call clCreateContext #} pps ndev devp cb_funptr ud_ptr ep
     checkClError_ "clCreateContext" =<< peek ep
-    attachContextFinalizer ctx
+    attachFinalizer ctx
 
 -- |Create a new context from a device type that identifies the
 -- specific device(s) to include in the context.  
@@ -89,7 +89,7 @@ createContextFromType devtype properties callback =
                  cb_funptr <- mkCallback fn
                  {#call clCreateContextFromType #} props typ_num cb_funptr ud_ptr ep
     checkClError_ "clCreateContextFromType" =<< peek ep
-    attachContextFinalizer ctx
+    attachFinalizer ctx
 
 mkCallback :: Storable a 
            => (String -> a -> IO ())
@@ -99,7 +99,6 @@ mkCallback fn = wrapCallback $
      err_str <- peekCAString errinfo
      user_data <- peek (castPtr user_data_ptr)
      fn err_str user_data  
-
 
 foreign import ccall "wrapper" wrapCallback :: 
                 (Ptr CChar -> Ptr () -> CULong -> Ptr () -> IO ())
@@ -145,8 +144,6 @@ contextProperties context =
           in (p, xs')
 
 -- C interfacing functions
-clGetContextInfo_ :: Ptr CContext -> CUInt -> CULong -> Ptr () -> Ptr CULong -> IO CInt
-clGetContextInfo_ context name size value size_ret =
-  checkClError "clGetContextInfo" =<< 
-    {#call unsafe clGetContextInfo #} context name size value size_ret
+clGetContextInfo_ = checkClError5 "clGetContextInfo"
+                                  {#call unsafe clGetContextInfo #}
 

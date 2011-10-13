@@ -2,55 +2,64 @@
 #include <CL/cl.h>
 
 module Foreign.OpenCL.Bindings.Internal.Finalizers (
-  attachContextFinalizer,
-  attachCommandQueueFinalizer,
-  attachProgramFinalizer,
-  attachKernelFinalizer,
-  attachEventFinalizer
+attachFinalizer, attachRetainFinalizer
 )
 where
 
+import Foreign.C.Types
 import Foreign.Ptr
 import Foreign.ForeignPtr
 
 {# import Foreign.OpenCL.Bindings.Internal.Types #}
 
--- Context --
-attachContextFinalizer :: ClContext -> IO Context
-attachContextFinalizer = newForeignPtr clReleaseContextFunPtr
+  
+attachFinalizer :: Finalizable a => Ptr a -> IO (ForeignPtr a)
+attachFinalizer = newForeignPtr releaseFn
+  
+attachRetainFinalizer :: Finalizable a => Ptr a -> IO (ForeignPtr a)
+attachRetainFinalizer ptr = retain ptr >> attachFinalizer ptr
 
--- Pointer to context release function
+
+class Finalizable a where
+  releaseFn :: FunPtr (Ptr a -> IO ())
+  retain :: Ptr a -> IO ClInt
+
+-- Context --
+instance Finalizable CContext where
+  releaseFn = clReleaseContextFunPtr
+  retain = {# call unsafe clRetainContext #}
+
 foreign import ccall "CL/cl.h &clReleaseContext" clReleaseContextFunPtr
    :: FunPtr (ClContext -> IO ())
 
 -- CommandQueue --
-attachCommandQueueFinalizer :: ClCommandQueue -> IO CommandQueue
-attachCommandQueueFinalizer = newForeignPtr clReleaseCommandQueueFunPtr
+instance Finalizable CCommandQueue where
+  releaseFn = clReleaseCommandQueueFunPtr
+  retain = {# call unsafe clRetainCommandQueue #}
 
--- Pointer to context release function
 foreign import ccall "CL/cl.h &clReleaseCommandQueue" clReleaseCommandQueueFunPtr
    :: FunPtr (ClCommandQueue -> IO ())
 
--- Program Objects --
-attachProgramFinalizer :: ClProgram -> IO Program
-attachProgramFinalizer = newForeignPtr clReleaseProgramFunPtr
+-- Program --
+instance Finalizable CProgram where
+  releaseFn = clReleaseProgramFunPtr
+  retain = {# call unsafe clRetainProgram #}
 
--- Pointer to context release function
 foreign import ccall "CL/cl.h &clReleaseProgram" clReleaseProgramFunPtr
    :: FunPtr (ClProgram -> IO ())
 
--- Kernel Objects --
-attachKernelFinalizer :: ClKernel -> IO Kernel
-attachKernelFinalizer = newForeignPtr clReleaseKernelFunPtr
+-- Kernel --
+instance Finalizable CKernel where
+  releaseFn = clReleaseKernelFunPtr
+  retain = {# call unsafe clRetainKernel #}
 
--- Pointer to context release function
 foreign import ccall "CL/cl.h &clReleaseKernel" clReleaseKernelFunPtr
    :: FunPtr (ClKernel -> IO ())
 
--- Event Objects --
-attachEventFinalizer :: ClEvent -> IO Event
-attachEventFinalizer = newForeignPtr clReleaseEventFunPtr
+-- Event --
+instance Finalizable CEvent where
+  releaseFn = clReleaseEventFunPtr
+  retain = {# call unsafe clRetainEvent #}
 
--- Pointer to context release function
 foreign import ccall "CL/cl.h &clReleaseEvent" clReleaseEventFunPtr
    :: FunPtr (ClEvent -> IO ())

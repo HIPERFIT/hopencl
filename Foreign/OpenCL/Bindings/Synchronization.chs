@@ -36,7 +36,7 @@ enqueueMarker queue =
   alloca $ \evptr -> do
     checkClError_ "clEnqueueMarker" =<< 
       {# call unsafe clEnqueueMarker #} queue_ptr evptr
-    attachEventFinalizer =<< peek evptr
+    attachFinalizer =<< peek evptr
 
 -- | Enqueues a barrier. This is a synchronization point, that ensures
 -- that all commands enqueued to the queue is completed before any
