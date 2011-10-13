@@ -31,7 +31,8 @@ License:             BSD3
 License-file:        LICENSE
 Author:              Martin Dybdal <dybber@dybber.dk>
 Maintainer:          Martin Dybdal <dybber@dybber.dk>
-Copyright:           Copyright (c) 2011. Martin Dybdal <dybber@dybber.dk>
+Copyright:           Copyright (c) 2011. Martin Dybdal, HIPERFIT research center, University of Copenhagen
+                     
 
 Tested-with:         GHC == 7.0.3
 Build-type:          Custom
