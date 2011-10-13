@@ -1,5 +1,7 @@
 {-# LANGUAGE ExistentialQuantification #-}
 
+import Data.List (intercalate)
+
 import Control.Monad
 import Control.Applicative
 
@@ -13,7 +15,7 @@ platformInfoFn = [
   platformVendor,
   platformVersion,
   platformProfile,
-  platformExtensions]
+  \x -> intercalate ", " <$> platformExtensions x]
 
 main :: IO ()
 main = do
