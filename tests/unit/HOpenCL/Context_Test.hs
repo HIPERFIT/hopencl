@@ -12,7 +12,8 @@ import Control.Monad (forM_, forM)
 --   Test suite   --
 --------------------
 tests = testGroup "Context"
-        [ testCase "Obtain context(s)" testContext
+        [ testCase "createContext" test_createContext
+        , testCase "createContextFromType" test_createContextFromType
         , testContextProps
         ]
 
@@ -21,25 +22,34 @@ testContextProps = buildTest $ do
   devices <- mapM (getDeviceIDs [DeviceTypeAll]) platforms
   let pds = zip (map ContextPlatform platforms) devices
   cs <- forM pds $ \(p, ds) -> createContext ds [p] NoContextCallback
-  return $ testGroup "Context properties"
-     [ testCase "contextDevices"    $ forM_ (zip cs devices) testContextDevices
-     , testCase "contextProperties" $ forM_ (zip cs platforms) testContextProperties
+  return $ testGroup "Property getters"
+     [ testCase "contextDevices"    $ forM_ (zip cs devices) test_contextDevices
+     , testCase "contextProperties" $ forM_ (zip cs platforms) test_contextProperties
      ]
 
 --------------------
 -- Test functions --
 --------------------
 
-testContext = do
+-- Test that no error is thrown on creation
+test_createContext = do
   platforms <- getPlatformIDs
   devices <- mapM (getDeviceIDs [DeviceTypeAll]) platforms
   let pds = zip (map ContextPlatform platforms) devices
   forM_ pds $ \(p, ds) -> createContext ds [p] NoContextCallback
 
-testContextDevices (cs, devices) = do
+-- Test that no error is thrown on creation
+test_createContextFromType = do
+  platforms <- getPlatformIDs
+  forM_ platforms $ 
+    \p -> createContextFromType DeviceTypeAll [ContextPlatform p] NoContextCallback
+
+-- Check that we obtain the same DeviceID as on creation
+test_contextDevices (cs, devices) = do
   devices' <- contextDevices cs
   devices @=? devices'
 
-testContextProperties (cs, platform) = do
+-- Check that we obtain the same PlatformID as on creation
+test_contextProperties (cs, platform) = do
   properties' <- contextProperties cs
   [ContextPlatform platform] @=? properties'

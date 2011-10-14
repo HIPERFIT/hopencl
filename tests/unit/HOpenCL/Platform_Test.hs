@@ -14,18 +14,18 @@ import Test_Util (oneOfM, void)
 --   Test suite   --
 --------------------
 tests = testGroup "Platform"
-        [ testCase "Obtain platform(s)" testPlatform
+        [ testCase "getPlatformIDs" test_getPlatformIDs
         , testPlatformProperties
         ]
 
 testPlatformProperties = buildTest $ do
   ps <- getPlatformIDs
-  return $ testGroup "Platform properties"
-    [ testCase "Platform Version"    $ forM_ ps testPlatformVersion
-    , testCase "platformName"       $ forM_ ps testPlatformName
-    , testCase "platformProfile"    $ forM_ ps testPlatformProfile
-    , testCase "platformVendor"     $ forM_ ps testPlatformVendor
-    , testCase "platformExtensions" $ forM_ ps testPlatformExtensions
+  return $ testGroup "Property getters"
+    [ testCase "platformVersion"    $ forM_ ps test_platformVersion
+    , testCase "platformName"       $ forM_ ps test_platformName
+    , testCase "platformProfile"    $ forM_ ps test_platformProfile
+    , testCase "platformVendor"     $ forM_ ps test_platformVendor
+    , testCase "platformExtensions" $ forM_ ps test_platformExtensions
     ]
 
 --------------------
@@ -33,13 +33,14 @@ testPlatformProperties = buildTest $ do
 --------------------
 
 -- Test that it possible to obtain at least one platform
-testPlatform = do
+test_getPlatformIDs = do
   platforms <- getPlatformIDs
   length platforms > 0 @? "No platforms found"
 
--- The primary test here is that no error is thrown
-testPlatformVersion = void . platformVersion
-testPlatformName = void . platformName
-testPlatformProfile p = platformProfile p `oneOfM` ["FULL_PROFILE", "EMBEDDED_PROFILE"]
-testPlatformVendor = void . platformVendor
-testPlatformExtensions = void . platformExtensions
+-- The primary test here is that no error is thrown, the rest is
+-- checked through the types
+test_platformVersion = void . platformVersion
+test_platformName = void . platformName
+test_platformProfile p = platformProfile p `oneOfM` ["FULL_PROFILE", "EMBEDDED_PROFILE"]
+test_platformVendor = void . platformVendor
+test_platformExtensions = void . platformExtensions

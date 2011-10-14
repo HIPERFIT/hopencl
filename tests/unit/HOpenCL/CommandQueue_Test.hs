@@ -11,8 +11,8 @@ import Control.Monad (forM_, forM)
 --------------------
 --   Test suite   --
 --------------------
-tests = testGroup "Command Queue"
-        [ testCase "Obtain queue(s)" testCommandQueue
+tests = testGroup "CommandQueue"
+        [ testCase "createCommandQueue" test_createCommandQueue
         , testCommandQueueProps
         ]
 
@@ -24,20 +24,20 @@ testCommandQueueProps = buildTest $ do
   let cds = [(c, d) | c <- cs, ds <- devices, d <- ds]
   let properties = [QueueProfilingEnable]
   queues <- forM cds $ \(c, d) -> createCommandQueue c d properties
-  return $ testGroup "CommandQueue properties"
+  return $ testGroup "CommandQueue property getters"
      [ testCase "queueContext"   $ forM_ (zip queues (map fst cds))
-                                         testQueueContext
+                                         test_queueContext
      , testCase "queueDevice"    $ forM_ (zip queues (map snd cds))
-                                         testQueueDevice
+                                         test_queueDevice
      , testCase "queueProperties" $ forM_ queues
-                                          (testQueueProperties properties)
+                                          (test_queueProperties properties)
      ]
 
 --------------------
 -- Test functions --
 --------------------
 
-testCommandQueue = do
+test_createCommandQueue = do
   platforms <- getPlatformIDs
   devices <- mapM (getDeviceIDs [DeviceTypeAll]) platforms
   let pds = zip (map ContextPlatform platforms) devices
@@ -46,14 +46,14 @@ testCommandQueue = do
     forM ds $ \d ->
       createCommandQueue c d [QueueOutOfOrderExecModeEnable]
 
-testQueueContext (queue, context) = do
+test_queueContext (queue, context) = do
   context' <- queueContext queue
   context @=? context'
 
-testQueueDevice (queue, device) = do
+test_queueDevice (queue, device) = do
   device' <- queueDevice queue
   device @=? device'
 
-testQueueProperties props queue = do
+test_queueProperties props queue = do
   props' <- queueProperties queue
   props @=? props'
