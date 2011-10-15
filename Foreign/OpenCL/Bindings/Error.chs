@@ -12,7 +12,7 @@
 module Foreign.OpenCL.Bindings.Error (
     ClException(..), ClError(..),
     checkClError, checkClError_, 
-    checkClError5,
+    checkClError5, checkClError6,
     throwError, assert
   )
 where
@@ -53,6 +53,10 @@ checkClError_ str errcode = checkClError str errcode >> return ()
 checkClError5 :: String -> (a -> b -> c -> d -> e -> IO ClInt)
                         -> (a -> b -> c -> d -> e -> IO ClInt)
 checkClError5 msg fn = \a0 a1 a2 a3 a4 -> checkClError msg =<< fn a0 a1 a2 a3 a4
+
+checkClError6 :: String -> (a -> b -> c -> d -> e -> f -> IO ClInt)
+                        -> (a -> b -> c -> d -> e -> f -> IO ClInt)
+checkClError6 msg fn = \a0 a1 a2 a3 a4 a5 -> checkClError msg =<< fn a0 a1 a2 a3 a4 a5
 
 
 decodeError :: ClInt -> ClError

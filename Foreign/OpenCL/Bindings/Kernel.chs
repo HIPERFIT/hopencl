@@ -132,6 +132,12 @@ enqueueTask cq k waitEvs =
        attachFinalizer =<< peek eventPtr
 
 kernelContext :: Kernel -> IO Context
+
+
+
+
+
+
 kernelContext kernel = 
   getKernelInfo kernel KernelContext >>= attachRetainFinalizer
 
@@ -139,7 +145,7 @@ kernelFunctionName :: Kernel -> IO String
 kernelFunctionName kernel = getKernelInfo kernel KernelFunctionName
 
 kernelNumArgs :: Kernel -> IO Int
-kernelNumArgs kernel = getKernelInfo kernel KernelNumArgs
+kernelNumArgs kernel = fromIntegral `fmap` (getKernelInfo kernel KernelNumArgs :: IO ClUInt)
 
 kernelWorkGroupSize :: Kernel -> DeviceID -> IO CSize
 kernelWorkGroupSize kernel device =
@@ -162,15 +168,15 @@ getKernelInfo kernel info =
     withForeignPtr kernel $ \kernel_ptr ->
     getInfo (clGetKernelInfo_ kernel_ptr) info
   where
-    clGetKernelInfo_ k name size value size_ret =
-      checkClError "clGetKernelInfo" =<<
-        {#call unsafe clGetKernelInfo #} k name size value size_ret
+    clGetKernelInfo_ =
+      checkClError5 "clGetKernelInfo"
+                    {#call unsafe clGetKernelInfo #}
 
 getKernelWorkGroupInfo kernel device info =
     withForeignPtr kernel $ \kernel_ptr ->
     getInfo (clGetKernelWorkGroupInfo_ kernel_ptr device) info
   where
-    clGetKernelWorkGroupInfo_ k dev name size value size_ret =
-      checkClError "clGetKernelWorkGroupInfo" =<< 
-        {#call unsafe clGetKernelWorkGroupInfo #} k dev name size value size_ret
+    clGetKernelWorkGroupInfo_ =
+      checkClError6 "clGetKernelWorkGroupInfo" 
+                    {#call unsafe clGetKernelWorkGroupInfo #}
 
