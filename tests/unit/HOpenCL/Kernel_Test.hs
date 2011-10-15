@@ -6,7 +6,7 @@ import Test.HUnit hiding (Test, test)
 import Test.Framework.Providers.HUnit (testCase)
 import Test.Framework (testGroup, buildTest)
 
-import Control.Monad (forM)
+import Control.Monad (forM_, forM)
 
 import Test_Util
 
@@ -16,6 +16,7 @@ import Test_Util
 tests = testGroup "Kernel"
         [ testCase "createKernel (simple)" test_createKernel_simple
         , testCase "createKernel (vectorAdd)" test_createKernel_vectorAdd
+        , testCase "setKernelArg (simple)" test_setKernelArg
         , testKernelProps
         ]
 
@@ -32,7 +33,7 @@ kernel_vectorAdd =
 kernel_simple = 
          "__kernel void simple(const int a,"
       ++                       "const int b) {"
-      ++ "}"
+      ++ "};"
 
 program = kernel_vectorAdd ++ kernel_simple
 
@@ -47,11 +48,15 @@ test_createKernel prog kernel_name = do
   devs <- mapM contextDevices cs
   let build_opts = ""
   mapM_ (($build_opts) . uncurry buildProgram) $ zip progs devs
-  mapM_ (`createKernel` kernel_name) progs
+  mapM (`createKernel` kernel_name) progs
 
-test_createKernel_vectorAdd = test_createKernel program "vectorAdd"
-test_createKernel_simple = test_createKernel program "simple"
+test_createKernel_vectorAdd = test_createKernel program "vectorAdd" >> return ()
+test_createKernel_simple = test_createKernel program "simple" >> return ()
 
+test_setKernelArg = do
+  kernels <- test_createKernel program "simple"
+  forM_ kernels $ \k -> do
+    setKernelArgs k $ map VArg ([1,2] :: [ClInt])
 
 testKernelProps = buildTest $ do
   platforms <- getPlatformIDs
@@ -71,6 +76,7 @@ testKernelProps = buildTest $ do
      , testCase "kernelWorkGroupSize" $ mapM_ test_kernelWorkGroupSize kerneldevs
      , testCase "kernelLocalMemSize"  $ mapM_ test_kernelLocalMemSize kerneldevs
      , testCase "kernelPrivateMemSize"$ mapM_ test_kernelPrivateMemSize kerneldevs
+--     , testCase "kernelCompileWorkGroupSize"$ mapM_ test_kernelCompileWorkGroupSize kerneldevs
      , testCase "kernelPreferredWorkGroupSizeMultiple" $ mapM_ test_kernelPreferredWorkGroupSizeMultiple kerneldevs
      ]
 
@@ -89,5 +95,6 @@ test_kernelContext (kernel, context) = do
 test_kernelWorkGroupSize = void . uncurry kernelWorkGroupSize
 test_kernelLocalMemSize = void . uncurry kernelLocalMemSize
 test_kernelPrivateMemSize = void . uncurry kernelPrivateMemSize
+--test_kernelCompileWorkGroupSize = void . uncurry kernelPrivateMemSize
 test_kernelPreferredWorkGroupSizeMultiple = void . uncurry kernelPreferredWorkGroupSizeMultiple
 

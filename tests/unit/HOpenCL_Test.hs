@@ -7,6 +7,7 @@ import qualified HOpenCL.Context_Test
 import qualified HOpenCL.CommandQueue_Test
 import qualified HOpenCL.Program_Test
 import qualified HOpenCL.Kernel_Test
+import qualified HOpenCL.MemoryObject_Test
 
 -- Use plain output format, to avoid terminal color annotations
 main = do opts <- interpretArgsOrExit ["--plain"]
@@ -19,4 +20,5 @@ tests = testGroup "HOpenCL"
         , HOpenCL.CommandQueue_Test.tests
         , HOpenCL.Program_Test.tests
         , HOpenCL.Kernel_Test.tests
+        , HOpenCL.MemoryObject_Test.tests
         ]
