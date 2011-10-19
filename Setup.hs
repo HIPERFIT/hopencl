@@ -17,8 +17,8 @@ main = defaultMainWithHooks $ simpleUserHooks { preBuild = preBuild' }
 -- Because of a problem with Cabal dependency resolution of .chs
 -- files, we need to execute C2HS manually on these two files
 maybeRunC2HS = do 
-  existsA <- doesFileExist "dist/buildForeign/OpenCL/Bindings/Internal/Types.chi"
-  existsB <- doesFileExist "dist/buildForeign/OpenCL/Bindings/Internal/Finalizers.chi"
+  existsA <- doesFileExist "dist/build/Foreign/OpenCL/Bindings/Internal/Types.chi"
+  existsB <- doesFileExist "dist/build/Foreign/OpenCL/Bindings/Internal/Finalizers.chi"
   when (not $ existsA && existsB) $ do
     let c2hs_args="--output-dir=dist/build --include=dist/build  --cppopts=-Iinclude"
     createDirectoryIfMissing True "dist/build/Foreign/OpenCL/Bindings/Internal"
