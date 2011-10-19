@@ -1,4 +1,4 @@
-{-# LANGUAGE ForeignFunctionInterface #-}
+{-# LANGUAGE ForeignFunctionInterface, CPP #-}
 #include <CL/cl.h>
 
 module Foreign.OpenCL.Bindings.Internal.Finalizers (
@@ -29,7 +29,7 @@ instance Finalizable CContext where
   releaseFn = clReleaseContextFunPtr
   retain = {# call unsafe clRetainContext #}
 
-foreign import ccall "CL/cl.h &clReleaseContext" clReleaseContextFunPtr
+foreign import CALLCONV "CL/cl.h &clReleaseContext" clReleaseContextFunPtr
    :: FunPtr (ClContext -> IO ())
 
 -- CommandQueue --
@@ -37,7 +37,7 @@ instance Finalizable CCommandQueue where
   releaseFn = clReleaseCommandQueueFunPtr
   retain = {# call unsafe clRetainCommandQueue #}
 
-foreign import ccall "CL/cl.h &clReleaseCommandQueue" clReleaseCommandQueueFunPtr
+foreign import CALLCONV "CL/cl.h &clReleaseCommandQueue" clReleaseCommandQueueFunPtr
    :: FunPtr (ClCommandQueue -> IO ())
 
 -- Program --
@@ -45,7 +45,7 @@ instance Finalizable CProgram where
   releaseFn = clReleaseProgramFunPtr
   retain = {# call unsafe clRetainProgram #}
 
-foreign import ccall "CL/cl.h &clReleaseProgram" clReleaseProgramFunPtr
+foreign import CALLCONV "CL/cl.h &clReleaseProgram" clReleaseProgramFunPtr
    :: FunPtr (ClProgram -> IO ())
 
 -- Kernel --
@@ -53,7 +53,7 @@ instance Finalizable CKernel where
   releaseFn = clReleaseKernelFunPtr
   retain = {# call unsafe clRetainKernel #}
 
-foreign import ccall "CL/cl.h &clReleaseKernel" clReleaseKernelFunPtr
+foreign import CALLCONV "CL/cl.h &clReleaseKernel" clReleaseKernelFunPtr
    :: FunPtr (ClKernel -> IO ())
 
 -- Event --
@@ -61,5 +61,5 @@ instance Finalizable CEvent where
   releaseFn = clReleaseEventFunPtr
   retain = {# call unsafe clRetainEvent #}
 
-foreign import ccall "CL/cl.h &clReleaseEvent" clReleaseEventFunPtr
+foreign import CALLCONV "CL/cl.h &clReleaseEvent" clReleaseEventFunPtr
    :: FunPtr (ClEvent -> IO ())

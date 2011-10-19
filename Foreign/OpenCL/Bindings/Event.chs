@@ -1,4 +1,4 @@
-{-# LANGUAGE ForeignFunctionInterface #-}
+{-# LANGUAGE ForeignFunctionInterface, CPP #-}
 -- |
 -- Module      : Foreign.OpenCL.Bindings.Event
 -- Copyright   : (c) 2011, Martin Dybdal
@@ -82,7 +82,7 @@ setUserEventStatus event execution_status =
     err <- {# call unsafe clSetUserEventStatus #} event_ptr (fromIntegral execution_status)
     checkClError_ "clSetUserEventStatus" err
   
-foreign import ccall "wrapper" wrapCallback :: 
+foreign import CALLCONV "wrapper" wrapCallback :: 
                 (Ptr CEvent -> CInt -> Ptr () -> IO ())
   -> IO (FunPtr (Ptr CEvent -> CInt -> Ptr () -> IO ()))
 

@@ -33,23 +33,12 @@ Author:              Martin Dybdal <dybber@dybber.dk>
 Maintainer:          Martin Dybdal <dybber@dybber.dk>
 Copyright:           Copyright (c) 2011. Martin Dybdal, HIPERFIT research center, University of Copenhagen
                      
-
 Tested-with:         GHC == 7.0.3
 Build-type:          Custom
 Cabal-version:       >= 1.10
 
 Extra-source-files:  README
-                     prepare-install.sh
                      include/cl_enums.h
-
-                     -- OpenCL headers
-                     include/CL/cl_ext.h
-                     include/CL/cl_gl_ext.h
-                     include/CL/cl_gl.h
-                     include/CL/cl.h
-                     include/CL/cl.hpp
-                     include/CL/cl_platform.h
-                     include/CL/opencl.h
 
                      -- Unit tests
                      tests/unit/HOpenCL_Test.hs
@@ -80,11 +69,15 @@ Library
 
   Build-depends:     base >= 4 && < 5, bytestring
   Build-tools:       c2hs
-  Extra-Libraries:   OpenCL
   GHC-options:       -Wall -fno-warn-missing-signatures
   Default-language:  Haskell98
   Include-dirs:      include
-  Extra-lib-dirs:    /usr/lib/OpenCL/
+
+  if os(windows)
+    cpp-options: "-DCALLCONV=stdcall"
+  else
+    cpp-options: "-DCALLCONV=ccall"
+    Extra-Libraries:   OpenCL
 
 Test-suite unit
   Type:              exitcode-stdio-1.0

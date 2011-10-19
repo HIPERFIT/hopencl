@@ -1,4 +1,4 @@
-{-# LANGUAGE ForeignFunctionInterface, GADTs #-}
+{-# LANGUAGE ForeignFunctionInterface, GADTs, CPP #-}
 -- |
 -- Module      : Foreign.OpenCL.Bindings.Context
 -- Copyright   : (c) 2011, Martin Dybdal
@@ -100,7 +100,7 @@ mkCallback fn = wrapCallback $
      user_data <- peek (castPtr user_data_ptr)
      fn err_str user_data  
 
-foreign import ccall "wrapper" wrapCallback :: 
+foreign import CALLCONV "wrapper" wrapCallback :: 
                 (Ptr CChar -> Ptr () -> CULong -> Ptr () -> IO ())
   -> IO (FunPtr (Ptr CChar -> Ptr () -> CULong -> Ptr () -> IO ()))
 
