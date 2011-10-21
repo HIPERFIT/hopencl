@@ -51,8 +51,10 @@ enum ClError {
   InvalidGlObject = CL_INVALID_GL_OBJECT,
   InvalidBufferSize = CL_INVALID_BUFFER_SIZE,
   InvalidMipLevel = CL_INVALID_MIP_LEVEL,
-  InvalidGlobalWorkSize = CL_INVALID_GLOBAL_WORK_SIZE,
-  InvalidProperty = CL_INVALID_PROPERTY   // TODO Is this not supported by the NVIDIA implementation?
+  InvalidGlobalWorkSize = CL_INVALID_GLOBAL_WORK_SIZE
+  #ifdef CL_VERSION_1_1
+  , InvalidProperty = CL_INVALID_PROPERTY
+  #endif
 };
 
 /* OpenCL Version */
