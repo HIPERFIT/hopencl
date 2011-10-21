@@ -28,9 +28,9 @@ import Foreign.C.String
 
 import qualified Data.ByteString as B
 
-{# import Foreign.OpenCL.Bindings.Error #}
 {# import Foreign.OpenCL.Bindings.Internal.Types #}
 {# import Foreign.OpenCL.Bindings.Internal.Finalizers #}
+import Foreign.OpenCL.Bindings.Internal.Error
 import Foreign.OpenCL.Bindings.Internal.Util
 
 -- | Create a program from a string containing the source code

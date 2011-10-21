@@ -37,9 +37,9 @@ import Foreign.Ptr
 import Foreign.ForeignPtr
 import qualified Foreign.Marshal as F
 
-{# import Foreign.OpenCL.Bindings.Error #}
 {# import Foreign.OpenCL.Bindings.Internal.Types #}
 {# import Foreign.OpenCL.Bindings.Internal.Finalizers #}
+import Foreign.OpenCL.Bindings.Internal.Error
 import Foreign.OpenCL.Bindings.Internal.Util
 
 createBuffer :: Context -> [MemFlags] -> Int -> Ptr a -> IO (MemObject a)
@@ -154,10 +154,6 @@ withListArray context xs = withListArrayLen context xs . const
 withListArrayLen :: Storable a => Context -> [a] -> (Int -> MemObject a -> IO b) -> IO b
 withListArrayLen context xs f =
   bracket (newListArrayLen context xs) (free . fst) (uncurry . flip $ f)
---
--- XXX: Will this attempt to double-free the device array on error (together
--- with newListArrayLen)?
---
 
 -- TODO implement copyArray using enqueueCopyBuffer
 

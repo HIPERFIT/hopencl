@@ -53,11 +53,11 @@ import Foreign.Ptr
 import Foreign.Storable
 import Foreign.Marshal
 
-{# import Foreign.OpenCL.Bindings.Error #}
 {# import Foreign.OpenCL.Bindings.Internal.Types #}
+import Foreign.OpenCL.Bindings.Internal.Error
 import Foreign.OpenCL.Bindings.Internal.Util
 
--- ^Obtain a list of available devices on a platform.
+-- | Obtain a list of available devices on a platform.
 getDeviceIDs :: [DeviceType] -- ^ The types of devices to query
              -> PlatformID
              -> IO [DeviceID]
@@ -77,7 +77,8 @@ clGetDeviceInfo_ device name size value size_ret =
 
 ------- Below are the device info query functions --------
 
--- |The compute device address space size in bits.
+-- |The default compute device address space size in bits. (Supported
+-- values in OpenCL 1.1.: 32 bits or 64 bits)
 deviceAddressBits :: DeviceID -> IO Word32
 deviceAddressBits dev = fromIntegral `fmap` (getDeviceInfo dev DeviceAddressBits :: IO ClUInt)
 

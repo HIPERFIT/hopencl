@@ -25,33 +25,33 @@ where
 import Foreign.C.Types
 import Foreign.Ptr
 
-{# import Foreign.OpenCL.Bindings.Error #}
 {# import Foreign.OpenCL.Bindings.Internal.Types #}
+import Foreign.OpenCL.Bindings.Internal.Error
 import Foreign.OpenCL.Bindings.Internal.Util
 
--- ^Obtain a list of available OpenCL platforms.
+-- | Obtain a list of available OpenCL platforms.
 getPlatformIDs :: IO [PlatformID]
 getPlatformIDs = getList clGetPlatformIDs_
 
--- ^ OpenCL profile string. See CL_PLATFORM_PROFILE in the OpenCL
+-- | OpenCL profile string. See CL_PLATFORM_PROFILE in the OpenCL
 -- specification for full documentation.
 platformProfile :: PlatformID -> IO String
 platformProfile = getPlatformInfo PlatformProfile
 
--- ^ OpenCL version string. See CL_PLATFORM_VERSION in the
+-- | OpenCL version string. See CL_PLATFORM_VERSION in the
 -- OpenCL specification for full documentation.
 platformVersion :: PlatformID -> IO String
 platformVersion = getPlatformInfo PlatformVersion
 
--- ^ OpenCL name string
+-- | OpenCL name string
 platformName :: PlatformID -> IO String
 platformName = getPlatformInfo PlatformName
 
--- ^ OpenCL vendor string
+-- | OpenCL vendor string
 platformVendor :: PlatformID -> IO String
 platformVendor = getPlatformInfo PlatformVendor
 
--- ^ OpenCL extensions. Extensions defined here are supported by all
+-- | OpenCL extensions. Extensions defined here are supported by all
 -- devices associated with this platform.
 platformExtensions :: PlatformID -> IO [String]
 platformExtensions = (fmap words) . getPlatformInfo PlatformExtensions

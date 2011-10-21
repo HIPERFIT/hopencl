@@ -9,10 +9,9 @@
 -- Portability : non-portable (GHC extensions)
 --
 -- 
--- OpenCL bindings for contexts. Contexts are used by the OpenCL
+-- OpenCL bindings for contexts. 'Context's are used by the OpenCL
 -- runtime for managing objects such as command-queues, memory,
--- program and kernel objects and for executing kernels on one or more
--- devices specified in the context. See section 4.3 in the OpenCL
+-- program and kernel objects. See section 4.3 in the OpenCL
 -- specification
 
 module Foreign.OpenCL.Bindings.Context (
@@ -27,13 +26,13 @@ import Foreign
 import Foreign.C.Types
 import Foreign.C.String
 
-{# import Foreign.OpenCL.Bindings.Error #}
 {# import Foreign.OpenCL.Bindings.Internal.Types #}
 {# import Foreign.OpenCL.Bindings.Internal.Finalizers #}
+import Foreign.OpenCL.Bindings.Internal.Error
 import Foreign.OpenCL.Bindings.Internal.Util
 
 -- | Used to specify the callback notification function that will
--- receive reports on errors in a context.
+-- receive reports on errors occuring in a context.
 data ContextCallback a where
   NoContextCallback :: ContextCallback ()
   ContextCallback :: Storable a => a ->  (String -> a -> IO ()) -> ContextCallback a

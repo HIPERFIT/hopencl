@@ -1,4 +1,4 @@
- {-# LANGUAGE EmptyDataDecls #-}
+ {-# LANGUAGE EmptyDataDecls, DeriveDataTypeable #-}
 
 module Foreign.OpenCL.Bindings.Internal.Types (
   CPlatformID, CDeviceID, CContext, CCommandQueue, CProgram, CKernel, CEvent, CSampler,
@@ -12,6 +12,8 @@ module Foreign.OpenCL.Bindings.Internal.Types (
   ClBitfield, ClBool, ClSize,
 
   clFalse, clTrue, toOCLBool,
+  
+  ClException(..), ClError(..),
 
   PlatformInfo(..), ContextProperties(..), ClContextProperties(..), ContextInfo(..),
   DeviceType(..), DeviceInfo(..), DeviceFPConfig(..), DeviceMemCacheType(..),
@@ -29,6 +31,9 @@ where
 import Foreign.Ptr
 import Foreign.ForeignPtr
 import Foreign.C.Types
+
+import Control.Exception hiding (assert)
+import Data.Typeable
 
 -- Abstract types
 data CPlatformID
@@ -92,6 +97,21 @@ clTrue = fromIntegral $ fromEnum ClTrue
 toOCLBool :: Bool -> ClUInt
 toOCLBool True = clTrue
 toOCLBool False = clFalse
+
+-- Errors
+{# enum ClError {} deriving (Show, Eq) #}
+
+data ClException = ClException ClError (Maybe String)
+     deriving Typeable
+
+instance Exception ClException
+
+instance Show ClException where
+  show (ClException err (Just loc)) =
+    "OpenCL Exception: " ++ show err ++ " occurred in call to: " ++ loc
+  show (ClException err Nothing) =
+    "OpenCL Exception: " ++ show err
+
 
 
 -- Platform

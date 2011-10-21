@@ -19,8 +19,10 @@ module Foreign.OpenCL.Bindings.Types (
   ClBitfield, ClBool, ClSize,
 
   clFalse, clTrue, toOCLBool,
+  
+  ClException(..), ClError(..),
 
-  PlatformInfo(..), ContextProperties(..), ClContextProperties(..), ContextInfo(..),
+  PlatformInfo(..), ContextProperties(..), ContextInfo(..),
   DeviceType(..), DeviceInfo(..), DeviceFPConfig(..), DeviceMemCacheType(..),
   DeviceLocalMemType(..), DeviceExecCapabilities(..),
   CommandQueueProperties(..), CommandQueueInfo(..), CommandExecStatus(..),

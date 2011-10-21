@@ -10,10 +10,10 @@
 --
 -- 
 -- OpenCL bindings for command-queues. Command Queues are used to
--- schedule operations on memory, program and kernel objects. Multiple
--- command queues can be used when synchronization between individual
--- tasks are not desired.
--- See section 5.1 in the OpenCL specification
+-- schedule operations (such as memory operations and kernel
+-- invocations) on a given device. Multiple command queues can be used
+-- with a single device if no synchronization between individual tasks
+-- is desired.  See section 5.1 in the OpenCL specification
 
 module Foreign.OpenCL.Bindings.CommandQueue (
    createCommandQueue, queueContext, queueDevice, queueProperties, flush
@@ -26,12 +26,12 @@ import Control.Applicative
 import Foreign
 import Foreign.C.Types
 
-{# import Foreign.OpenCL.Bindings.Error #}
 {# import Foreign.OpenCL.Bindings.Internal.Types #}
 {# import Foreign.OpenCL.Bindings.Internal.Finalizers #}
+import Foreign.OpenCL.Bindings.Internal.Error
 import Foreign.OpenCL.Bindings.Internal.Util
 
--- |Create a new 'CommandQueue'
+-- |Create a new 'CommandQueue' for scheduling operations on the given device.
 createCommandQueue :: Context 
                        -- ^ The 'Context' to which the 'CommandQueue'
                        -- should be associated
@@ -49,17 +49,17 @@ createCommandQueue ctx dev props =
       checkClError_ "clCreateCommandQueue" =<< peek ep
       attachFinalizer queue
 
--- | The Context to which this CommandQueue is associated
+-- | The 'Context' this 'CommandQueue' is associated with
 queueContext :: CommandQueue -> IO Context
 queueContext queue = getCommandQueueInfo queue QueueContext 
                        >>= attachRetainFinalizer
 
--- | The DeviceID of the device to which this CommandQueue is associated
+-- | The 'DeviceID' of the device this 'CommandQueue' is associated with
 queueDevice :: CommandQueue -> IO DeviceID
 queueDevice queue = getCommandQueueInfo queue QueueDevice
 
--- | The list of CommandQueueProperties specified when this
--- CommandQueue was created.
+-- | The list of 'CommandQueueProperties' specified when the
+-- 'CommandQueue' was created.
 queueProperties :: CommandQueue -> IO [CommandQueueProperties]
 queueProperties queue =
    enumFromBitfield queue_props <$> (getCommandQueueInfo queue QueueProperties :: IO CInt)
@@ -67,11 +67,12 @@ queueProperties queue =
    queue_props = [QueueOutOfOrderExecModeEnable,
                   QueueProfilingEnable]
 
--- | Issues all previously queued OpenCL commands in command_queue to
--- the device associated with command_queue. 'flush' only guarantees
--- that all queued commands to command_queue get issued to the
--- appropriate device. There is no guarantee that they will be
--- complete after 'flush' returns.
+-- | Issues all previously queued OpenCL commands in the
+-- 'CommandQueue' to the device associated with the
+-- 'CommandQueue'. 'flush' only guarantees that all queued commands to
+-- the 'CommandQueue' get issued to the appropriate device. There is
+-- no guarantee that they will be complete after 'flush' returns. (See
+-- also 'Foreign.OpenCL.Bindings.Synchronization.finish')
 flush :: CommandQueue -> IO ()
 flush queue = 
   withForeignPtr queue $ \queue_ptr -> 

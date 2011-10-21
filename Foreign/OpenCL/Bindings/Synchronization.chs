@@ -22,9 +22,9 @@ module Foreign.OpenCL.Bindings.Synchronization (
 import Foreign
 import Foreign.C.Types
 
-{# import Foreign.OpenCL.Bindings.Error #}
 {# import Foreign.OpenCL.Bindings.Internal.Types #}
 {# import Foreign.OpenCL.Bindings.Internal.Finalizers #}
+import Foreign.OpenCL.Bindings.Internal.Error
 import Foreign.OpenCL.Bindings.Internal.Util
 
 -- | Enqueues a marker into a command queue. This returns an 'Event'
