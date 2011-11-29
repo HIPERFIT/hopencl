@@ -25,7 +25,11 @@ module Foreign.OpenCL.Bindings.MemoryObject (
    memobjHostPtr, memobjMapCount, memobjContext
    ) where
 
+#ifdef __APPLE__
+#include <OpenCL/cl.h>
+#else
 #include <CL/cl.h>
+#endif
 
 import Control.Exception
 import Control.Monad
@@ -38,7 +42,7 @@ import Foreign.ForeignPtr
 import qualified Foreign.Marshal as F
 
 {# import Foreign.OpenCL.Bindings.Internal.Types #}
-{# import Foreign.OpenCL.Bindings.Internal.Finalizers #}
+import Foreign.OpenCL.Bindings.Internal.Finalizers
 import Foreign.OpenCL.Bindings.Internal.Error
 import Foreign.OpenCL.Bindings.Internal.Util
 

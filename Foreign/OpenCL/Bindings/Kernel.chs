@@ -15,7 +15,7 @@ module Foreign.OpenCL.Bindings.Kernel (
    createKernel,
 
    kernelContext, kernelFunctionName, kernelNumArgs,
-   kernelWorkGroupSize, kernelLocalMemSize,
+   kernelWorkGroupSize, kernelCompileWorkGroupSize, kernelLocalMemSize,
    kernelPreferredWorkGroupSizeMultiple, kernelPrivateMemSize,
 
    enqueueNDRangeKernel, enqueueTask,
@@ -23,7 +23,11 @@ module Foreign.OpenCL.Bindings.Kernel (
    KernelArg(..), setKernelArg, setKernelArgs
   ) where
 
+#ifdef __APPLE__
+#include <OpenCL/cl.h>
+#else
 #include <CL/cl.h>
+#endif
 
 import Control.Monad
 
@@ -32,7 +36,7 @@ import Foreign.C.String
 import Foreign.C.Types
 
 {# import Foreign.OpenCL.Bindings.Internal.Types #}
-{# import Foreign.OpenCL.Bindings.Internal.Finalizers #}
+import Foreign.OpenCL.Bindings.Internal.Finalizers
 import Foreign.OpenCL.Bindings.Internal.Error
 import Foreign.OpenCL.Bindings.Internal.Util
 
@@ -49,6 +53,7 @@ createKernel prog name =
       checkClError_ "clCreateKernel" =<< peek ep
       attachFinalizer kernel
 
+-- | Enqueues a command to execute a given kernel on a device. See section 5.8 in the OpenCL 1.1 specification
 enqueueNDRangeKernel :: CommandQueue 
                      -> Kernel
                      -> [ClSize] -- ^ Global work offsets
@@ -83,6 +88,7 @@ data KernelArg where
   VArg :: Storable a => a -> KernelArg
   StructArg :: Storable a => [a] -> KernelArg
 
+-- | Invoking @setKernelArg krn n arg@ sets argument @n@ of the kernel @krn@
 setKernelArg :: Kernel -> Int -> KernelArg -> IO ()
 setKernelArg kernel n param =
   withForeignPtr kernel $ \k ->
@@ -112,10 +118,11 @@ setKernelArg kernel n param =
             pokeElems ptr (x:xs) = poke ptr x >> pokeElems (plusPtr ptr (sizeOf x)) xs
             pokeElems _ [] = return ()
 
+-- | Sets all arguments of a kernel to the parameters in the list
 setKernelArgs :: Kernel -> [KernelArg] -> IO ()
 setKernelArgs kernel args = zipWithM_ (setKernelArg kernel) [0..] args
 
-
+-- | Enqueue a command to execute a kernel using a single work-item.
 enqueueTask :: CommandQueue -> Kernel -> [Event] -> IO Event
 enqueueTask cq k waitEvs =
     withForeignPtr cq $ \queue ->
@@ -131,34 +138,65 @@ enqueueTask cq k waitEvs =
                    eventPtr
        attachFinalizer =<< peek eventPtr
 
+-- | The 'Context' associated with a 'Kernel'
 kernelContext :: Kernel -> IO Context
-
-
-
-
-
-
 kernelContext kernel = 
   getKernelInfo kernel KernelContext >>= attachRetainFinalizer
 
+-- | The function name (in the OpenCL C source code) of a 'Kernel'
 kernelFunctionName :: Kernel -> IO String
 kernelFunctionName kernel = getKernelInfo kernel KernelFunctionName
 
+-- | The number of arguments that needs to be set before invoking a 'Kernel'
 kernelNumArgs :: Kernel -> IO Int
 kernelNumArgs kernel = fromIntegral `fmap` (getKernelInfo kernel KernelNumArgs :: IO ClUInt)
 
+-- | The maximum work-group size that can be used to execute a kernel
+-- on a specific device given by device. The OpenCL implementation
+-- uses the resource requirements of the kernel (register usage etc.)
+-- to determine what this work group size should be.
 kernelWorkGroupSize :: Kernel -> DeviceID -> IO CSize
 kernelWorkGroupSize kernel device =
   getKernelWorkGroupInfo kernel device KernelWorkGroupSize
 
+-- | Returns the work-group size specified by the
+-- @__attribute__((reqd_work_group_size(X, Y, Z)))@ qualifier.
+-- Refer to section 6.8.2 of the OpenCL 1.1 specification
+-- If undefined, this function returns (0,0,0)
+kernelCompileWorkGroupSize :: Kernel -> DeviceID -> IO CSize
+kernelCompileWorkGroupSize kernel device =
+  getKernelWorkGroupInfo kernel device KernelCompileWorkGroupSize
+
+-- | Returns the amount of local memory in bytes being used by a
+-- kernel. This includes local memory that may be needed by an
+-- implementation to execute the kernel, variables declared inside the
+-- kernel with the __local address qualifier and local memory to be
+-- allocated for arguments to the kernel declared as pointers with the
+-- __local address qualifier and whose size is specified with
+-- 'setKernelArg'.
+--
+-- If the local memory size, for any pointer argument to the kernel
+-- declared with the __local address qualifier, is not specified, its
+-- size is assumed to be 0.
 kernelLocalMemSize :: Kernel -> DeviceID -> IO Word64
 kernelLocalMemSize kernel device =
   getKernelWorkGroupInfo kernel device KernelLocalMemSize
 
+-- | Returns the preferred multiple of work-group size for
+-- launch. This is a performance hint. Specifying a work-group size
+-- that is not a multiple of the value returned by this query as the
+-- value of the local work size argument to 'enqueueNDRangeKernel'
+-- will not fail to enqueue the kernel for execution unless the
+-- work-group size specified is larger than the device maximum.
 kernelPreferredWorkGroupSizeMultiple :: Kernel -> DeviceID -> IO CSize
 kernelPreferredWorkGroupSizeMultiple kernel device =
   getKernelWorkGroupInfo kernel device KernelPreferredWorkGroupSizeMultiple
 
+-- | Returns the minimum amount of private memory, in bytes, used by
+-- each work-item in the kernel. This value may include any private
+-- memory needed by an implementation to execute the kernel, including
+-- that used by the language built-ins and variable declared inside
+-- the kernel with the __private qualifier.
 kernelPrivateMemSize :: Kernel -> DeviceID -> IO Word64
 kernelPrivateMemSize kernel device =
   getKernelWorkGroupInfo kernel device KernelPrivateMemSize

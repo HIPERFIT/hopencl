@@ -76,8 +76,13 @@ Library
   if os(windows)
     cpp-options: "-DCALLCONV=stdcall"
   else
-    cpp-options: "-DCALLCONV=ccall"
-    Extra-Libraries:   OpenCL
+    if os(darwin)
+      cpp-options: "-DCALLCONV=ccall"
+      cc-options:  "-U__BLOCKS__"
+      frameworks:   OpenCL
+    else
+      cpp-options:     "-DCALLCONV=ccall"
+      Extra-Libraries: OpenCL
 
 Test-suite unit
   Type:              exitcode-stdio-1.0

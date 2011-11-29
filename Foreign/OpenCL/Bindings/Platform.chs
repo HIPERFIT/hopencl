@@ -20,7 +20,11 @@ module Foreign.OpenCL.Bindings.Platform (
   )
 where
 
+#ifdef __APPLE__
+#include <OpenCL/cl.h>
+#else
 #include <CL/cl.h>
+#endif
 
 import Foreign.C.Types
 import Foreign.Ptr

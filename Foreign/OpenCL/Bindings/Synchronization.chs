@@ -17,13 +17,17 @@ module Foreign.OpenCL.Bindings.Synchronization (
   , enqueueWaitForEvents, finish
   ) where
 
+#ifdef __APPLE__
+#include <OpenCL/cl.h>
+#else
 #include <CL/cl.h>
+#endif
 
 import Foreign
 import Foreign.C.Types
 
 {# import Foreign.OpenCL.Bindings.Internal.Types #}
-{# import Foreign.OpenCL.Bindings.Internal.Finalizers #}
+import Foreign.OpenCL.Bindings.Internal.Finalizers
 import Foreign.OpenCL.Bindings.Internal.Error
 import Foreign.OpenCL.Bindings.Internal.Util
 

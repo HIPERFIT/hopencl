@@ -25,7 +25,12 @@ module Foreign.OpenCL.Bindings.Internal.Types (
 )
 where
 
+#ifdef __APPLE__
+#include <OpenCL/cl.h>
+#else
 #include <CL/cl.h>
+#endif
+
 #include <cl_enums.h>
   
 import Foreign.Ptr

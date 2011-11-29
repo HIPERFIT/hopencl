@@ -17,7 +17,11 @@ module Foreign.OpenCL.Bindings.Program (
    programContext, programDevices, programSource, programBinaries
   ) where
 
+#ifdef __APPLE__
+#include <OpenCL/cl.h>
+#else
 #include <CL/cl.h>
+#endif
 
 import Control.Applicative
 import Control.Monad
@@ -29,7 +33,7 @@ import Foreign.C.String
 import qualified Data.ByteString as B
 
 {# import Foreign.OpenCL.Bindings.Internal.Types #}
-{# import Foreign.OpenCL.Bindings.Internal.Finalizers #}
+import Foreign.OpenCL.Bindings.Internal.Finalizers
 import Foreign.OpenCL.Bindings.Internal.Error
 import Foreign.OpenCL.Bindings.Internal.Util
 

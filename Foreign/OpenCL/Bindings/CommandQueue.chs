@@ -19,7 +19,11 @@ module Foreign.OpenCL.Bindings.CommandQueue (
    createCommandQueue, queueContext, queueDevice, queueProperties, flush
   ) where
 
+#ifdef __APPLE__
+#include <OpenCL/cl.h>
+#else
 #include <CL/cl.h>
+#endif
 
 import Control.Applicative
 
@@ -27,7 +31,7 @@ import Foreign
 import Foreign.C.Types
 
 {# import Foreign.OpenCL.Bindings.Internal.Types #}
-{# import Foreign.OpenCL.Bindings.Internal.Finalizers #}
+import Foreign.OpenCL.Bindings.Internal.Finalizers
 import Foreign.OpenCL.Bindings.Internal.Error
 import Foreign.OpenCL.Bindings.Internal.Util
 

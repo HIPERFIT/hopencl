@@ -19,7 +19,11 @@ module Foreign.OpenCL.Bindings.Event (
    setEventCompleteCallback, setUserEventStatus
   ) where
 
+#ifdef __APPLE__
+#include <OpenCL/cl.h>
+#else
 #include <CL/cl.h>
+#endif
 
 import Control.Monad
 
@@ -27,7 +31,7 @@ import Foreign
 import Foreign.C.Types
 
 {# import Foreign.OpenCL.Bindings.Internal.Types #}
-{# import Foreign.OpenCL.Bindings.Internal.Finalizers #}
+import Foreign.OpenCL.Bindings.Internal.Finalizers
 import Foreign.OpenCL.Bindings.Internal.Error
 import Foreign.OpenCL.Bindings.Internal.Util
 
@@ -45,18 +49,21 @@ getEventInfo event info =
     withForeignPtr event $ \event_ptr ->
     getInfo (clGetEventInfo_ event_ptr) info
 
+-- | The 'CommandQueue' associated with an 'Event'
 eventCommandQueue :: Event -> IO CommandQueue
 eventCommandQueue ev = 
   getEventInfo ev EventCommandQueue >>= attachRetainFinalizer
 
+-- | The 'Context' associated with an 'Event'
 eventContext :: Event -> IO Context
 eventContext ev = 
   getEventInfo ev EventContext >>= attachRetainFinalizer
 
+-- | The 'CommandType' of an 'Event'
 eventCommandType :: Event -> IO CommandType
 eventCommandType ev = liftM toEnum $ getEventInfo ev EventCommandType
 
--- ^ The OpenCL standard version 1.1 (page 146) mentions CL_COMPLETE
+-- | The OpenCL standard version 1.1 (page 146) mentions CL_COMPLETE
 -- as the only command execution callback types where a callback can
 -- be registered. This is the callback set by this function.
 setEventCompleteCallback :: Storable a => Event -> a -> (CommandExecStatus -> a -> IO ()) -> IO ()

@@ -18,7 +18,11 @@ module Foreign.OpenCL.Bindings.Context (
    createContext , createContextFromType, contextDevices, contextProperties, ContextCallback(..)
   ) where
 
+#ifdef __APPLE__
+#include <OpenCL/cl.h>
+#else
 #include <CL/cl.h>
+#endif
 
 import Control.Monad
 
@@ -27,7 +31,7 @@ import Foreign.C.Types
 import Foreign.C.String
 
 {# import Foreign.OpenCL.Bindings.Internal.Types #}
-{# import Foreign.OpenCL.Bindings.Internal.Finalizers #}
+import Foreign.OpenCL.Bindings.Internal.Finalizers
 import Foreign.OpenCL.Bindings.Internal.Error
 import Foreign.OpenCL.Bindings.Internal.Util
 

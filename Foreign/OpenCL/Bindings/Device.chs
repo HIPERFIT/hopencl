@@ -41,7 +41,11 @@ module Foreign.OpenCL.Bindings.Device (
    deviceType, deviceVendor, deviceVendorID, deviceVersion, deviceDriverVersion
  ) where
 
+#ifdef __APPLE__
+#include <OpenCL/cl.h>
+#else
 #include <CL/cl.h>
+#endif
 
 import Control.Monad
 import Control.Applicative
