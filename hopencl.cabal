@@ -37,7 +37,7 @@ Tested-with:         GHC == 7.0.3
 Build-type:          Custom
 Cabal-version:       >= 1.10
 
-Extra-source-files:  README
+Extra-source-files:  README.md
                      include/cl_enums.h
 
                      -- Unit tests
@@ -76,12 +76,12 @@ Library
   if os(windows)
     cpp-options: "-DCALLCONV=stdcall"
   else
+    cpp-options: "-DCALLCONV=ccall"
+
     if os(darwin)
-      cpp-options: "-DCALLCONV=ccall"
       cc-options:  "-U__BLOCKS__"
       frameworks:   OpenCL
     else
-      cpp-options:     "-DCALLCONV=ccall"
       Extra-Libraries: OpenCL
 
 Test-suite unit
