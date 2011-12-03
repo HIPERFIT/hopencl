@@ -45,6 +45,10 @@ cd examples/VectorAdd/
 runhaskell VectorAdd.hs
 ```
 
+Documentation
+-------------
+Haddock documentation is available at http://projects.haskell.org/hopencl/
+
 Tests
 -----
 To compile the test suite, the flag `--enable-tests` must be given to
