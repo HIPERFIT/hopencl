@@ -18,11 +18,7 @@ module Foreign.OpenCL.Bindings.Context (
    createContext , createContextFromType, contextDevices, contextProperties, ContextCallback(..)
   ) where
 
-#ifdef __APPLE__
-#include <OpenCL/cl.h>
-#else
 #include <CL/cl.h>
-#endif
 
 import Control.Monad
 

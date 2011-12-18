@@ -25,11 +25,7 @@ module Foreign.OpenCL.Bindings.MemoryObject (
    memobjHostPtr, memobjMapCount, memobjContext
    ) where
 
-#ifdef __APPLE__
-#include <OpenCL/cl.h>
-#else
 #include <CL/cl.h>
-#endif
 
 import Control.Exception
 import Control.Monad

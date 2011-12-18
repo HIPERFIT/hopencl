@@ -57,40 +57,6 @@ instance Finalizable CEvent where
   retain = clRetainEvent
 
 
-#ifdef __APPLE__
-
-foreign import CALLCONV "OpenCL/cl.h clRetainContext" clRetainContext
-   :: (ClContext -> IO ClInt)
-
-foreign import CALLCONV "OpenCL/cl.h clRetainCommandQueue" clRetainCommandQueue
-   :: (ClCommandQueue -> IO ClInt)
-
-foreign import CALLCONV "OpenCL/cl.h clRetainProgram" clRetainProgram
-   :: (ClProgram -> IO ClInt)
-
-foreign import CALLCONV "OpenCL/cl.h clRetainKernel" clRetainKernel
-   :: (ClKernel -> IO ClInt)
-
-foreign import CALLCONV "OpenCL/cl.h clRetainEvent" clRetainEvent
-   :: (ClEvent -> IO ClInt)
-
-foreign import CALLCONV "OpenCL/cl.h &clReleaseContext" clReleaseContextFunPtr
-   :: FunPtr (ClContext -> IO ())
-
-foreign import CALLCONV "OpenCL/cl.h &clReleaseCommandQueue" clReleaseCommandQueueFunPtr
-   :: FunPtr (ClCommandQueue -> IO ())
-
-foreign import CALLCONV "OpenCL/cl.h &clReleaseProgram" clReleaseProgramFunPtr
-   :: FunPtr (ClProgram -> IO ())
-
-foreign import CALLCONV "OpenCL/cl.h &clReleaseKernel" clReleaseKernelFunPtr
-   :: FunPtr (ClKernel -> IO ())
-
-foreign import CALLCONV "OpenCL/cl.h &clReleaseEvent" clReleaseEventFunPtr
-   :: FunPtr (ClEvent -> IO ())
-
-#else
-
 foreign import CALLCONV "CL/cl.h clRetainContext" clRetainContext
    :: (ClContext -> IO ClInt)
 
@@ -106,7 +72,6 @@ foreign import CALLCONV "CL/cl.h clRetainKernel" clRetainKernel
 foreign import CALLCONV "CL/cl.h clRetainEvent" clRetainEvent
    :: (ClEvent -> IO ClInt)
 
-
 foreign import CALLCONV "CL/cl.h &clReleaseContext" clReleaseContextFunPtr
    :: FunPtr (ClContext -> IO ())
 
@@ -121,7 +86,5 @@ foreign import CALLCONV "CL/cl.h &clReleaseKernel" clReleaseKernelFunPtr
 
 foreign import CALLCONV "CL/cl.h &clReleaseEvent" clReleaseEventFunPtr
    :: FunPtr (ClEvent -> IO ())
-
-#endif
 
 

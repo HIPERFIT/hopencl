@@ -23,11 +23,7 @@ module Foreign.OpenCL.Bindings.Kernel (
    KernelArg(..), setKernelArg, setKernelArgs
   ) where
 
-#ifdef __APPLE__
-#include <OpenCL/cl.h>
-#else
 #include <CL/cl.h>
-#endif
 
 import Control.Monad
 

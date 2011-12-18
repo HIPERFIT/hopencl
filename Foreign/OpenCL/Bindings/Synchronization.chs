@@ -17,11 +17,7 @@ module Foreign.OpenCL.Bindings.Synchronization (
   , enqueueWaitForEvents, finish
   ) where
 
-#ifdef __APPLE__
-#include <OpenCL/cl.h>
-#else
 #include <CL/cl.h>
-#endif
 
 import Foreign
 import Foreign.C.Types

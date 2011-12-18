@@ -17,11 +17,7 @@ module Foreign.OpenCL.Bindings.Program (
    programContext, programDevices, programSource, programBinaries
   ) where
 
-#ifdef __APPLE__
-#include <OpenCL/cl.h>
-#else
 #include <CL/cl.h>
-#endif
 
 import Control.Applicative
 import Control.Monad

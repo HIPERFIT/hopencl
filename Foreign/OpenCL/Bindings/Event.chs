@@ -19,11 +19,7 @@ module Foreign.OpenCL.Bindings.Event (
    setEventCompleteCallback, setUserEventStatus
   ) where
 
-#ifdef __APPLE__
-#include <OpenCL/cl.h>
-#else
 #include <CL/cl.h>
-#endif
 
 import Control.Monad
 
