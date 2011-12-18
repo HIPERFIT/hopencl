@@ -15,8 +15,6 @@
 module Foreign.OpenCL.Bindings.Device (
    getDeviceIDs,
 
-   -- The following functions are used to obtain properties of
-   -- devices.
    deviceAddressBits, deviceAvailable, deviceCompilerAvailable,
    deviceEndianLittle, deviceErrorCorrectionSupport,
 

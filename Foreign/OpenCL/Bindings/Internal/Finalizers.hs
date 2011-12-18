@@ -1,11 +1,19 @@
 {-# LANGUAGE ForeignFunctionInterface, CPP #-}
+-- |
+-- Module      : Foreign.OpenCL.Bindings.Internal.Finalizers
+-- Copyright   : (c) 2011, Martin Dybdal
+-- License     : BSD3
+-- 
+-- Maintainer  : Martin Dybdal <dybber@dybber.dk>
+-- Stability   : experimental
+-- Portability : non-portable (GHC extensions)
+--
 
 module Foreign.OpenCL.Bindings.Internal.Finalizers (
 attachFinalizer, attachRetainFinalizer
 )
 where
 
-import Foreign.C.Types
 import Foreign.Ptr
 import Foreign.ForeignPtr
 

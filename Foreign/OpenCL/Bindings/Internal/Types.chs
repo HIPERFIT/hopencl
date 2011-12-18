@@ -1,4 +1,13 @@
  {-# LANGUAGE EmptyDataDecls, DeriveDataTypeable #-}
+-- |
+-- Module      : Foreign.OpenCL.Bindings.Internal.Types
+-- Copyright   : (c) 2011, Martin Dybdal
+-- License     : BSD3
+-- 
+-- Maintainer  : Martin Dybdal <dybber@dybber.dk>
+-- Stability   : experimental
+-- Portability : non-portable (GHC extensions)
+--
 
 module Foreign.OpenCL.Bindings.Internal.Types (
   CPlatformID, CDeviceID, CContext, CCommandQueue, CProgram, CKernel, CEvent, CSampler,

@@ -1,5 +1,14 @@
 {-# LANGUAGE FlexibleInstances, UndecidableInstances,
              OverlappingInstances, ScopedTypeVariables #-}
+-- |
+-- Module      : Foreign.OpenCL.Bindings.Internal.Util
+-- Copyright   : (c) 2011, Martin Dybdal
+-- License     : BSD3
+-- 
+-- Maintainer  : Martin Dybdal <dybber@dybber.dk>
+-- Stability   : experimental
+-- Portability : non-portable (GHC extensions)
+--
 
 module Foreign.OpenCL.Bindings.Internal.Util where
 
