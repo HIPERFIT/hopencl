@@ -90,6 +90,9 @@ Library
 
     if os(darwin)
       cc-options:  "-U__BLOCKS__"
+      Frameworks:   OpenCL
+    else
+      Extra-Libraries: OpenCL
 
 Test-suite unit
   Type:              exitcode-stdio-1.0
@@ -97,19 +100,10 @@ Test-suite unit
   hs-source-dirs:    tests/unit
   Main-is:           HOpenCL_Test.hs
   Default-language:  Haskell98
-  GHC-options:       -Wall -fno-warn-missing-signatures -lOpenCL
+  GHC-options:       -Wall -fno-warn-missing-signatures
   Build-Depends:     base >=4, QuickCheck >= 2, test-framework >= 0.4.0,
                      test-framework-quickcheck2, HUnit,
                      test-framework-hunit, hopencl
-
-  -- Cabal doesn't seem to parse the following correctly, I therefore
-  -- specify it as -lOpenCL in GHC-options instead
-  -- 
-  -- if os(darwin)
-  --   Frameworks:   OpenCL
-  -- else
-  --   Extra-Libraries: OpenCL
-
 
 Source-repository head
   type: git
