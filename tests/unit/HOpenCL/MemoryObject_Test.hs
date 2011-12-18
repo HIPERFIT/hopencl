@@ -8,7 +8,7 @@ import Test.Framework (testGroup, buildTest)
 
 import Control.Monad (forM_, forM, liftM)
 
-import Test_Util
+import Foreign.Storable (sizeOf)
 
 --------------------
 --   Test suite   --
@@ -17,7 +17,21 @@ tests = testGroup "MemoryObject"
         [ testCase "mallocArray & free" test_mallocArray_free
         , testCase "allocaArray" test_allocaArray
         , testCase "newListArrayLen & peekListArray" test_newListArrayLen_peekListArray
+        , testMemObjectProps
         ]
+
+testMemObjectProps = buildTest $ do
+  platforms <- getPlatformIDs
+  devices <- mapM (getDeviceIDs [DeviceTypeAll]) platforms
+  let pds = zip (map ContextPlatform platforms) devices
+  cs <- forM pds $ \(p, ds) -> createContext ds [p] NoContextCallback
+  memobjs <- forM cs $ \ctx -> mallocArray ctx [MemReadWrite] 42 :: IO (MemObject ClFloat)
+  return $ testGroup "MemoryObject property getters"
+     [ testCase "memobjSize"     $ mapM_ (test_memobjSize 42) memobjs
+     -- , testCase "memobjHostPtr"  $ mapM_ test_memobjHostPtr memobjs
+     -- , testCase "memobjMapCount" $ mapM_ test_memobjMapCount memobjs
+     , testCase "memobjContext"  $ mapM_ test_memobjContext (zip memobjs cs)
+     ]
 
 list0 :: [ClInt]
 list0 = [1..100]
@@ -52,3 +66,11 @@ test_newListArrayLen_peekListArray = do
     (mobj, len) <- newListArrayLen context list0
     list0' <- peekListArray cq len mobj
     list0 @=? list0'
+
+test_memobjSize n memobj = do
+  size' <- memobjSize memobj
+  fromIntegral (n * sizeOf (undefined :: ClFloat)) @=? size'
+
+test_memobjContext (memobj, context) = do
+  context' <- memobjContext memobj
+  context @=? context'

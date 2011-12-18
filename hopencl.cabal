@@ -3,7 +3,7 @@ Version:             0.2.0
 Synopsis:            Haskell bindings for OpenCL
 Category:            Foreign
 Description:         The bindings follows version 1.1 of the OpenCL specification.
-                     Haddock documentation is available at http://projects.haskell.org/hopencl/
+                     Haddock documentation is available at <http://projects.haskell.org/hopencl/>
                      .
                      The following sections of the OpenCL specification are not
                      supported currently:
@@ -40,11 +40,20 @@ Cabal-version:       >= 1.10
 
 Extra-source-files:  README.md
                      include/cl_enums.h
+                     include/CL/opencl.h
+                     include/CL/cl_platform.h
+                     include/CL/cl.h
+                     include/CL/cl_ext.h
+                     include/CL/cl_d3d10.h
+                     include/CL/cl_gl.h
+                     include/CL/cl_gl_ext.h
 
                      -- Unit tests
                      tests/unit/HOpenCL_Test.hs
                      tests/unit/Test_Util.hs
                      tests/unit/HOpenCL/CommandQueue_Test.hs
+                     tests/unit/HOpenCL/MemoryObject_Test.hs
+                     tests/unit/HOpenCL/Kernel_Test.hs
                      tests/unit/HOpenCL/Context_Test.hs
                      tests/unit/HOpenCL/Device_Test.hs
                      tests/unit/HOpenCL/Platform_Test.hs
@@ -81,19 +90,26 @@ Library
 
     if os(darwin)
       cc-options:  "-U__BLOCKS__"
-      frameworks:   OpenCL
-    else
-      Extra-Libraries: OpenCL
 
 Test-suite unit
   Type:              exitcode-stdio-1.0
+
   hs-source-dirs:    tests/unit
   Main-is:           HOpenCL_Test.hs
   Default-language:  Haskell98
-  GHC-options:       -Wall -fno-warn-missing-signatures
+  GHC-options:       -Wall -fno-warn-missing-signatures -lOpenCL
   Build-Depends:     base >=4, QuickCheck >= 2, test-framework >= 0.4.0,
                      test-framework-quickcheck2, HUnit,
                      test-framework-hunit, hopencl
+
+  -- Cabal doesn't seem to parse the following correctly, I therefore
+  -- specify it as -lOpenCL in GHC-options instead
+  -- 
+  -- if os(darwin)
+  --   Frameworks:   OpenCL
+  -- else
+  --   Extra-Libraries: OpenCL
+
 
 Source-repository head
   type: git
