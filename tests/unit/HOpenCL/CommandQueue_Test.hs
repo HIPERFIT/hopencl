@@ -44,7 +44,7 @@ test_createCommandQueue = do
   cs <- forM pds $ \(p, ds) -> createContext ds [p] NoContextCallback
   forM_ (zip cs devices) $ \(c, ds) ->
     forM ds $ \d ->
-      createCommandQueue c d [QueueOutOfOrderExecModeEnable]
+      createCommandQueue c d [] -- [QueueOutOfOrderExecModeEnable]
 
 test_queueContext (queue, context) = do
   context' <- queueContext queue
