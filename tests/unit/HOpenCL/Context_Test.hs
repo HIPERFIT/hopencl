@@ -5,6 +5,7 @@ import Foreign.OpenCL.Bindings
 import Test.HUnit hiding (Test, test)
 import Test.Framework.Providers.HUnit (testCase)
 import Test.Framework (testGroup, buildTest)
+import Test_Util (listSame)
 
 import Control.Monad (forM_, forM)
 
@@ -47,7 +48,7 @@ test_createContextFromType = do
 -- Check that we obtain the same DeviceID as on creation
 test_contextDevices (cs, devices) = do
   devices' <- contextDevices cs
-  devices @=? devices'
+  listSame devices devices'
 
 -- Check that we obtain the same PlatformID as on creation
 test_contextProperties (cs, platform) = do
