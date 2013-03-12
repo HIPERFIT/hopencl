@@ -19,7 +19,7 @@ main = defaultMainWithHooks $ simpleUserHooks { preBuild = preBuild' }
 maybeRunC2HS = do 
   existsA <- doesFileExist "dist/build/Foreign/OpenCL/Bindings/Internal/Types.chi"
   when (not existsA) $ do
-    let c2hs_args="--output-dir=dist/build --include=dist/build  --cppopts=-Iinclude"
+    let c2hs_args="--output-dir=dist/build --include=dist/build  --cppopts=-Iinclude --cppopts=-U__BLOCKS__"
     createDirectoryIfMissing True "dist/build/Foreign/OpenCL/Bindings/Internal"
     _ <- system $ "c2hs " ++ c2hs_args ++ " Foreign/OpenCL/Bindings/Internal/Types.chs"
     return ()
