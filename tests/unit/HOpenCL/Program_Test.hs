@@ -5,6 +5,7 @@ import Foreign.OpenCL.Bindings
 import Test.HUnit hiding (Test, test)
 import Test.Framework.Providers.HUnit (testCase)
 import Test.Framework (testGroup, buildTest)
+import Test_Util (listSame)
 
 import Control.Monad (forM_, forM)
 
@@ -62,7 +63,8 @@ test_buildProgram = do
 
 test_programDevices (program, devices) = do
   devices' <- programDevices program
-  devices @=? devices'
+  listSame devices devices'
+--  devices @=? devices'
 
 test_programContext (program, context) = do
   context' <- programContext program
