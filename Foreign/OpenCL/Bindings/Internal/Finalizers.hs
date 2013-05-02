@@ -15,6 +15,7 @@ attachFinalizer, attachRetainFinalizer
 where
 
 import Foreign.Ptr
+import Foreign.C.Types (CInt(..))
 import Foreign.ForeignPtr
 
 import Foreign.OpenCL.Bindings.Internal.Types
