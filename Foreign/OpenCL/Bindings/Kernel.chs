@@ -96,7 +96,8 @@ setKernelArg kernel n param =
       InvalidArgIndex -> error $ "ClInvalidArgIndex occurred in call to: clSetKernelArg, when setting argument #"
                                  ++ show n
       _ -> checkClError_ "clSetKernelArg" err
-      where size (MObjArg mobj) = fromIntegral $ sizeOf (memobjPtr mobj)
+      where size :: KernelArg -> CULong
+            size (MObjArg mobj) = fromIntegral $ sizeOf (memobjPtr mobj)
             size (VArg v) = fromIntegral $ sizeOf v
             size (StructArg xs) = fromIntegral . sum $ map sizeOf xs
             size (LocalArrayArg x m) = fromIntegral $ m * sizeOf x        
