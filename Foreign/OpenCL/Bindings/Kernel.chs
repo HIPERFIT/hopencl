@@ -89,7 +89,7 @@ setKernelArg :: Kernel -> Int -> KernelArg -> IO ()
 setKernelArg kernel n param =
   withForeignPtr kernel $ \k ->
   withPtr param $ \param_ptr -> do
-    err <- {# call unsafe clSetKernelArg #} k (fromIntegral n) (size param) param_ptr
+    err <- {# call unsafe clSetKernelArg #} k (fromIntegral n) (fromIntegral $ size param) param_ptr
     case toEnum $ fromIntegral err of
       InvalidArgSize  -> error $ "ClInvalidArgSize occurred in call to: clSetKernelArg. Argument #"
                                  ++ show n ++ " was set to size " ++ show (size param)
