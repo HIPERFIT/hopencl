@@ -88,11 +88,11 @@ Library
   else
     cpp-options: "-DCALLCONV=ccall"
 
-    if os(darwin)
-      cc-options:  "-U__BLOCKS__"
-      Frameworks:   OpenCL
-    else
-      Extra-Libraries: OpenCL
+  if os(darwin)
+    cc-options:  "-U__BLOCKS__"
+    Frameworks:   OpenCL
+  else
+    Extra-Libraries: OpenCL
 
 Test-suite unit
   Type:              exitcode-stdio-1.0
