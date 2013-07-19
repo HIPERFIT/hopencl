@@ -89,14 +89,14 @@ setKernelArg :: Kernel -> Int -> KernelArg -> IO ()
 setKernelArg kernel n param =
   withForeignPtr kernel $ \k ->
   withPtr param $ \param_ptr -> do
-    err <- {# call unsafe clSetKernelArg #} k (fromIntegral n) (fromIntegral $ size param) param_ptr
+    err <- {# call unsafe clSetKernelArg #} k (fromIntegral n) (size param) param_ptr
     case toEnum $ fromIntegral err of
       InvalidArgSize  -> error $ "ClInvalidArgSize occurred in call to: clSetKernelArg. Argument #"
                                  ++ show n ++ " was set to size " ++ show (size param)
       InvalidArgIndex -> error $ "ClInvalidArgIndex occurred in call to: clSetKernelArg, when setting argument #"
                                  ++ show n
       _ -> checkClError_ "clSetKernelArg" err
-      where size :: KernelArg -> CULong
+      where size :: KernelArg -> ClSize
             size (MObjArg mobj) = fromIntegral $ sizeOf (memobjPtr mobj)
             size (VArg v) = fromIntegral $ sizeOf v
             size (StructArg xs) = fromIntegral . sum $ map sizeOf xs

@@ -92,7 +92,7 @@ createContextFromType devtype properties callback =
 
 mkCallback :: Storable a 
            => (String -> a -> IO ())
-           -> IO (FunPtr (Ptr CChar -> Ptr () -> CULong -> Ptr () -> IO ()))
+           -> IO (FunPtr (Ptr CChar -> Ptr () -> ClSize -> Ptr () -> IO ()))
 mkCallback fn = wrapCallback $ 
   \errinfo _ _ user_data_ptr -> do
      err_str <- peekCAString errinfo
@@ -100,8 +100,8 @@ mkCallback fn = wrapCallback $
      fn err_str user_data  
 
 foreign import CALLCONV "wrapper" wrapCallback :: 
-                (Ptr CChar -> Ptr () -> CULong -> Ptr () -> IO ())
-  -> IO (FunPtr (Ptr CChar -> Ptr () -> CULong -> Ptr () -> IO ()))
+                (Ptr CChar -> Ptr () -> ClSize -> Ptr () -> IO ())
+  -> IO (FunPtr (Ptr CChar -> Ptr () -> ClSize -> Ptr () -> IO ()))
 
 
 flattenContextProps :: Num a => [ContextProperties] -> [a]
