@@ -30,6 +30,7 @@ import Foreign.C.Types
 import Foreign.OpenCL.Bindings.Internal.Finalizers
 import Foreign.OpenCL.Bindings.Internal.Error
 import Foreign.OpenCL.Bindings.Internal.Util
+import Foreign.OpenCL.Bindings.Internal.Logging as Log
 
 -- |Create a new 'CommandQueue' for scheduling operations on the given device.
 createCommandQueue :: Context 
@@ -45,6 +46,7 @@ createCommandQueue :: Context
 createCommandQueue ctx dev props =
    withForeignPtr ctx $ \ctx_ptr ->
    alloca $ \ep -> do
+      Log.debug "Invoking clCreateCommandQueue"
       queue <- {# call unsafe clCreateCommandQueue #} ctx_ptr dev (enumToBitfield props) ep
       checkClError_ "clCreateCommandQueue" =<< peek ep
       attachFinalizer queue

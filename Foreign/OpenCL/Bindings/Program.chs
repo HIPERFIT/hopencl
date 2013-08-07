@@ -32,6 +32,7 @@ import qualified Data.ByteString as B
 import Foreign.OpenCL.Bindings.Internal.Finalizers
 import Foreign.OpenCL.Bindings.Internal.Error
 import Foreign.OpenCL.Bindings.Internal.Util
+import Foreign.OpenCL.Bindings.Internal.Logging as Log
 
 -- | Create a program from a string containing the source code
 --
@@ -44,6 +45,7 @@ createProgram ctx str =
    with cstr $ \cstr_ptr -> -- clCreateProgramWithSource expects a list of strings
    with (fromIntegral len) $ \len_ptr -> -- and a list of their lengths
    alloca $ \ep -> do
+      Log.debug "Invoking clCreateProgramWithSource"
       prog <- {#call unsafe clCreateProgramWithSource #} ctx_ptr 1 cstr_ptr len_ptr ep
       checkClError_ "clCreateProgramWithSource" =<< peek ep
       attachFinalizer prog
@@ -83,6 +85,7 @@ buildProgram p devs opts =
   withForeignPtr p $ \prog ->
   withArrayLen devs $ \n dev_ptr ->
   withCString opts $ \opt_ptr -> do
+   Log.debug "Invoking clBuildProgram"
    err <- {#call unsafe clBuildProgram #}
               prog (fromIntegral n)
               dev_ptr opt_ptr nullFunPtr nullPtr

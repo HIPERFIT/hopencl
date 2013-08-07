@@ -35,6 +35,7 @@ import Foreign.C.Types
 import Foreign.OpenCL.Bindings.Internal.Finalizers
 import Foreign.OpenCL.Bindings.Internal.Error
 import Foreign.OpenCL.Bindings.Internal.Util
+import Foreign.OpenCL.Bindings.Internal.Logging as Log
 
 -- | Create a program from a string containing the source code
 --
@@ -45,6 +46,7 @@ createKernel prog name =
    withForeignPtr prog $ \prog_ptr ->
    withCString name $ \cstr ->
    alloca $ \ep -> do
+      Log.debug "Invoking clCreateKernel"
       kernel <- {# call unsafe clCreateKernel #} prog_ptr cstr ep
       checkClError_ "clCreateKernel" =<< peek ep
       attachFinalizer kernel
@@ -66,7 +68,8 @@ enqueueNDRangeKernel cq k globalWorkOffsets globalWorkSizes localWorkSizes waitE
     withForeignPtrs waitEvs $ \event_ptrs ->
     withArrayNullLen event_ptrs $ \n event_array ->
     alloca $ \eventPtr ->
-    do checkClError_ "clEnqueueNDRangeKernel" =<< 
+    do Log.debug "Invoking clEnqueueNDRangeKernel"
+       checkClError_ "clEnqueueNDRangeKernel" =<< 
          {# call unsafe clEnqueueNDRangeKernel #} 
                    queue kernel workDim
                    globalWorkOffsetPtr
@@ -89,6 +92,7 @@ setKernelArg :: Kernel -> Int -> KernelArg -> IO ()
 setKernelArg kernel n param =
   withForeignPtr kernel $ \k ->
   withPtr param $ \param_ptr -> do
+    Log.debug "Invoking clSetKernelArgs"
     err <- {# call unsafe clSetKernelArg #} k (fromIntegral n) (size param) param_ptr
     case toEnum $ fromIntegral err of
       InvalidArgSize  -> error $ "ClInvalidArgSize occurred in call to: clSetKernelArg. Argument #"

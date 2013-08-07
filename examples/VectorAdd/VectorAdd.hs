@@ -1,5 +1,6 @@
 import Control.Applicative
 import Foreign.OpenCL.Bindings
+import System.Mem
 
 n :: Int
 n = 100
@@ -30,8 +31,10 @@ main = do
   
   -- Enqueue kernel
   setKernelArgs kernel [MObjArg array0, MObjArg array1, MObjArg out]
-  _ <- enqueueNDRangeKernel queue kernel [] [fromIntegral n] [] []
+  event <- enqueueNDRangeKernel queue kernel [] [fromIntegral n] [] []
   
   -- Read result
   print =<< peekListArray queue n out
-
+  free array0
+  free array1
+  free out

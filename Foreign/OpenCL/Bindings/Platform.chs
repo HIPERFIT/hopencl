@@ -28,33 +28,36 @@ import Foreign.Ptr
 {# import Foreign.OpenCL.Bindings.Internal.Types #}
 import Foreign.OpenCL.Bindings.Internal.Error
 import Foreign.OpenCL.Bindings.Internal.Util
+import qualified Foreign.OpenCL.Bindings.Internal.Logging as Log
 
 -- | Obtain a list of available OpenCL platforms.
 getPlatformIDs :: IO [PlatformID]
-getPlatformIDs = getList clGetPlatformIDs_
+getPlatformIDs = do
+  Log.debug "Invoking clGetPlatformIDs"
+  getList clGetPlatformIDs_
 
 -- | OpenCL profile string. See CL_PLATFORM_PROFILE in the OpenCL
 -- specification for full documentation.
 platformProfile :: PlatformID -> IO String
-platformProfile = getPlatformInfo PlatformProfile
+platformProfile pid = getPlatformInfo PlatformProfile pid
 
 -- | OpenCL version string. See CL_PLATFORM_VERSION in the
 -- OpenCL specification for full documentation.
 platformVersion :: PlatformID -> IO String
-platformVersion = getPlatformInfo PlatformVersion
+platformVersion pid = getPlatformInfo PlatformVersion pid
 
 -- | OpenCL name string
 platformName :: PlatformID -> IO String
-platformName = getPlatformInfo PlatformName
+platformName pid = getPlatformInfo PlatformName pid
 
 -- | OpenCL vendor string
 platformVendor :: PlatformID -> IO String
-platformVendor = getPlatformInfo PlatformVendor
+platformVendor pid = getPlatformInfo PlatformVendor pid
 
 -- | OpenCL extensions. Extensions defined here are supported by all
 -- devices associated with this platform.
 platformExtensions :: PlatformID -> IO [String]
-platformExtensions = (fmap words) . getPlatformInfo PlatformExtensions
+platformExtensions pid = words `fmap` getPlatformInfo PlatformExtensions pid
 
 
 -- Interfacing functions that performs error checking

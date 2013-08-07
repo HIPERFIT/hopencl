@@ -16,47 +16,56 @@ where
 
 import Foreign.Ptr
 import Foreign.C.Types (CInt(..))
-import Foreign.ForeignPtr
+import Foreign.ForeignPtr (ForeignPtr)
+import Foreign.Concurrent (newForeignPtr)
 
 import Foreign.OpenCL.Bindings.Internal.Types
+import Foreign.OpenCL.Bindings.Internal.Logging as Log
 
   
 attachFinalizer :: Finalizable a => Ptr a -> IO (ForeignPtr a)
-attachFinalizer = newForeignPtr releaseFn
+attachFinalizer ptr = do
+  Log.debug $ "Adding finalizer to " ++ (finalizableName ptr)
+  newForeignPtr ptr (Log.debug ("releasing " ++ (finalizableName ptr)) >> release ptr)
   
 attachRetainFinalizer :: Finalizable a => Ptr a -> IO (ForeignPtr a)
 attachRetainFinalizer ptr = retain ptr >> attachFinalizer ptr
 
 
 class Finalizable a where
-  releaseFn :: FunPtr (Ptr a -> IO ())
+  finalizableName :: Ptr a -> String
+  release :: Ptr a -> IO ()
   retain :: Ptr a -> IO ClInt
 
 -- Context --
 instance Finalizable CContext where
-  releaseFn = clReleaseContextFunPtr
-  retain = clRetainContext
+  finalizableName _ = "Context"
+  release ctx     = clReleaseContext ctx
+  retain ctx      = clRetainContext ctx
 
 -- CommandQueue --
 instance Finalizable CCommandQueue where
-  releaseFn = clReleaseCommandQueueFunPtr
-  retain = clRetainCommandQueue
+  finalizableName _ = "CommandQueue"
+  release queue   = clReleaseCommandQueue queue
+  retain queue    = clRetainCommandQueue queue
 
 -- Program --
 instance Finalizable CProgram where
-  releaseFn = clReleaseProgramFunPtr
-  retain = clRetainProgram
+  finalizableName _ = "Program"
+  release prog    = clReleaseProgram prog
+  retain prog     = clRetainProgram prog
 
 -- Kernel --
 instance Finalizable CKernel where
-  releaseFn = clReleaseKernelFunPtr
-  retain = clRetainKernel
+  finalizableName _ = "Kernel"
+  release kernel  = clReleaseKernel kernel
+  retain kernel   = clRetainKernel kernel
 
 -- Event --
 instance Finalizable CEvent where
-  releaseFn = clReleaseEventFunPtr
-  retain = clRetainEvent
-
+  finalizableName _ = "Event"
+  release event   =  clReleaseEvent event
+  retain event    = clRetainEvent event
 
 foreign import CALLCONV "CL/cl.h clRetainContext" clRetainContext
    :: (ClContext -> IO ClInt)
@@ -73,19 +82,17 @@ foreign import CALLCONV "CL/cl.h clRetainKernel" clRetainKernel
 foreign import CALLCONV "CL/cl.h clRetainEvent" clRetainEvent
    :: (ClEvent -> IO ClInt)
 
-foreign import CALLCONV "CL/cl.h &clReleaseContext" clReleaseContextFunPtr
-   :: FunPtr (ClContext -> IO ())
+foreign import CALLCONV "CL/cl.h clReleaseContext" clReleaseContext
+   :: (ClContext -> IO ())
 
-foreign import CALLCONV "CL/cl.h &clReleaseCommandQueue" clReleaseCommandQueueFunPtr
-   :: FunPtr (ClCommandQueue -> IO ())
+foreign import CALLCONV "CL/cl.h clReleaseCommandQueue" clReleaseCommandQueue
+   :: (ClCommandQueue -> IO ())
 
-foreign import CALLCONV "CL/cl.h &clReleaseProgram" clReleaseProgramFunPtr
-   :: FunPtr (ClProgram -> IO ())
+foreign import CALLCONV "CL/cl.h clReleaseProgram" clReleaseProgram
+   :: (ClProgram -> IO ())
 
-foreign import CALLCONV "CL/cl.h &clReleaseKernel" clReleaseKernelFunPtr
-   :: FunPtr (ClKernel -> IO ())
+foreign import CALLCONV "CL/cl.h clReleaseKernel" clReleaseKernel
+   :: ClKernel -> IO ()
 
-foreign import CALLCONV "CL/cl.h &clReleaseEvent" clReleaseEventFunPtr
-   :: FunPtr (ClEvent -> IO ())
-
-
+foreign import CALLCONV "CL/cl.h clReleaseEvent" clReleaseEvent
+   :: (ClEvent -> IO ())

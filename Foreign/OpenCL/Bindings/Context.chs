@@ -30,6 +30,7 @@ import Foreign.C.String
 import Foreign.OpenCL.Bindings.Internal.Finalizers
 import Foreign.OpenCL.Bindings.Internal.Error
 import Foreign.OpenCL.Bindings.Internal.Util
+import Foreign.OpenCL.Bindings.Internal.Logging as Log
 
 -- | Used to specify the callback notification function that will
 -- receive reports on errors occuring in a context.
@@ -50,6 +51,7 @@ createContext devs props callback =
   withArray0 0 (flattenContextProps props) $ \pps ->
   withArray devs $ \devp ->
   alloca $ \ep -> do
+    Log.debug "Invoking clCreateContext"
     let ndev = fromIntegral $ length devs
     ctx <- case callback of
              NoContextCallback -> 

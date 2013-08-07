@@ -54,12 +54,14 @@ import Foreign.Marshal
 {# import Foreign.OpenCL.Bindings.Internal.Types #}
 import Foreign.OpenCL.Bindings.Internal.Error
 import Foreign.OpenCL.Bindings.Internal.Util
+import Foreign.OpenCL.Bindings.Internal.Logging as Log
 
 -- | Obtain a list of available devices on a platform.
 getDeviceIDs :: [DeviceType] -- ^ The types of devices to query
              -> PlatformID
              -> IO [DeviceID]
-getDeviceIDs typ platform =
+getDeviceIDs typ platform = do
+  Log.debug "Invoking clGetDeviceIDs"
   getList (clGetDeviceIDs_ platform (enumToBitfield typ))
  where
   clGetDeviceIDs_ pform devtype num_entries devs num_devs =

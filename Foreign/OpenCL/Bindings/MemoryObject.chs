@@ -41,11 +41,13 @@ import qualified Foreign.Marshal as F
 import Foreign.OpenCL.Bindings.Internal.Finalizers
 import Foreign.OpenCL.Bindings.Internal.Error
 import Foreign.OpenCL.Bindings.Internal.Util
+import Foreign.OpenCL.Bindings.Internal.Logging as Log
 
 createBuffer :: Context -> [MemFlags] -> Int -> Ptr a -> IO (MemObject a)
 createBuffer context flags n value_ptr =
   withForeignPtr context $ \ctx ->
   F.alloca $ \ep -> do
+    Log.debug "Invoking clCreateBuffer"
     memobj <- {#call unsafe clCreateBuffer #}
                   ctx (enumToBitfield flags) (fromIntegral n)
                   (castPtr value_ptr) ep
@@ -74,7 +76,8 @@ allocaArray context flags n = bracket (mallocArray context flags n) free
 
 -- | Deallocates a memory object.
 free :: MemObject a -> IO ()
-free dp = do err <- {#call unsafe clReleaseMemObject #} (memobjPtr dp)
+free dp = do Log.debug "Invoking clReleaseMemObject"
+             err <- {#call unsafe clReleaseMemObject #} (memobjPtr dp)
              checkClError_ "clReleaseMemObject" err
 
 -- | Moves the content of a memory object from device to host exposing
@@ -166,6 +169,7 @@ enqueueReadBuffer q memobj doblock offset cb ptr event_wait_list =
   withForeignPtrs event_wait_list $ \event_ptrs ->
   withArrayNullLen event_ptrs $ \n event_array -> do
   F.alloca $ \event -> do
+    Log.debug "Invoking clEnqueueReadBuffer"
     checkClError_ "clEnqueueReadBuffer" =<< 
       {#call unsafe clEnqueueReadBuffer #} 
           queue (memobjPtr memobj) (toOCLBool doblock) offset

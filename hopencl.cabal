@@ -59,11 +59,18 @@ Extra-source-files:  README.md
                      tests/unit/HOpenCL/Platform_Test.hs
                      tests/unit/HOpenCL/Program_Test.hs
 
+
+Flag debug
+  Description:          Enable debugging messages
+  Default:              True
+
+
 Library
   Other-modules:     Foreign.OpenCL.Bindings.Internal.Types
                      Foreign.OpenCL.Bindings.Internal.Finalizers
                      Foreign.OpenCL.Bindings.Internal.Error
                      Foreign.OpenCL.Bindings.Internal.Util
+                     Foreign.OpenCL.Bindings.Internal.Logging
 
   Exposed-modules:   Foreign.OpenCL.Bindings
                      Foreign.OpenCL.Bindings.Types
@@ -82,6 +89,9 @@ Library
   GHC-options:       -Wall -fno-warn-missing-signatures
   Default-language:  Haskell98
   Include-dirs:      include
+
+  if flag(debug)
+    cpp-options: "-DHOPENCL_DEBUG"
 
   if os(windows)
     cpp-options: "-DCALLCONV=stdcall"
