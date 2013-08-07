@@ -1,6 +1,7 @@
 import Control.Applicative
 import Foreign.OpenCL.Bindings
 import System.Mem
+import Control.Concurrent
 
 n :: Int
 n = 100
@@ -38,3 +39,5 @@ main = do
   free array0
   free array1
   free out
+  performGC
+  threadDelay 2000000
